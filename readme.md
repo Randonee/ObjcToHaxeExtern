@@ -1,0 +1,1 @@
+Converts objective c class header files to haxe class externs
