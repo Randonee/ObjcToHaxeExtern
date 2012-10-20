@@ -1,0 +1,30 @@
+<project basedir="." default="build">
+	
+	<target name="build">
+		<exec dir="." failonerror="true" executable="haxe">
+			<arg line="build.hxml" />
+		</exec>
+	</target>
+	
+	
+	<target name="run">
+		<exec dir="." failonerror="true" executable="haxe">
+			<arg line="build.hxml" />
+		</exec>
+		
+		<exec dir="." failonerror="true" executable="neko">
+			<arg line="objctohaxeextern.n" />
+			<arg line="in" />
+			<arg line="out" />
+		</exec>
+	</target>
+	
+	<target name="test">
+		<exec dir="." failonerror="true" executable="haxe">
+			<arg line="test.hxml" />
+		</exec>
+		<exec dir="." failonerror="true" executable="neko">
+			<arg line="test.n" />
+		</exec>
+	</target>
+</project>

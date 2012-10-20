@@ -1,0 +1,3 @@
+-main test.org.objctohaxeextern.TestMain
+-cp src
+-neko test.n

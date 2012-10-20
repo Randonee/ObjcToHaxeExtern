@@ -1,0 +1,3 @@
+-main org.objctohaxeextern.Main
+-cp src
+-neko objctohaxeextern.n
