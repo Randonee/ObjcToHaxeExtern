@@ -18,7 +18,7 @@ class ParserTester extends haxe.unit.TestCase
     	assertTrue(clazz.methods.exists("foo"));
     	var method:Method = clazz.methods.get("foo")[0];
     	assertEquals("foo", method.name);
-    	assertEquals("arg1", method.arguments[0].name);
+    	assertEquals("num", method.arguments[0].name);
     	assertEquals("int", method.arguments[0].type);
     	assertEquals("void", method.returnType);
     	
@@ -31,11 +31,11 @@ class ParserTester extends haxe.unit.TestCase
     	assertTrue(clazz.methods.exists("foo"));
     	var method:Method = clazz.methods.get("foo")[0];
     	assertEquals("foo", method.name);
-    	assertEquals("arg1", method.arguments[0].name);
-    	assertEquals("UIView", method.arguments[0].type);
-    	assertEquals("withInt", method.arguments[1].name);
-    	assertEquals("int", method.arguments[1].type);
-    	assertEquals("UILabel", method.returnType);
+    	assertEquals("view", method.arguments[0].name);
+    	assertEquals("UIView*", method.arguments[0].type);
+    	assertEquals("num", method.arguments[1].name);
+    	assertEquals("unsignedint", method.arguments[1].type);
+    	assertEquals("UILabel*", method.returnType);
     }
     
     
@@ -53,7 +53,7 @@ class ParserTester extends haxe.unit.TestCase
     	assertTrue(clazz.methods.exists("viewForBaselineLayout"));
     	var method:Method = clazz.methods.get("viewForBaselineLayout")[0];
     	assertEquals("viewForBaselineLayout", method.name);
-    	assertEquals("UIView", method.returnType);
+    	assertEquals("UIView*", method.returnType);
     }
     
     public function testParseStaticMethod()
@@ -67,7 +67,7 @@ class ParserTester extends haxe.unit.TestCase
     	
     	var method:Method = clazz.staticMethods[0];
     	assertEquals("foo", method.name);
-    	assertEquals("arg1", method.arguments[0].name);
+    	assertEquals("num", method.arguments[0].name);
     	assertEquals("int", method.arguments[0].type);
     	assertEquals("void", method.returnType);
     }

@@ -124,7 +124,7 @@ class Parser
 		var method:Method = {name:"", arguments:new Array<Argument>(), returnType:""};
 		var isStatic:Bool = (tokens[0] == "+");
 		
-		method.returnType = tokens[2];
+		method.returnType = getTokensBetweenParens(tokens, 1).join("");
 		
 		var index:Int=0;
 		while(index < tokens.length && tokens[index] != ")")
@@ -134,31 +134,21 @@ class Parser
 		method.name = tokens[index];
 		++index;
 		
-		var arg:String = "";
-		var lastArg:Argument = {type:"---", name:"---"};
-		var argCount:Int = 1;
 		while(index < tokens.length)
 		{
 			if(tokens[index] == "(")
 			{
 				var arg:Argument = {type:"", name:""};
 				
-				if(method.arguments.length > 0 && tokens[index-2] != lastArg.name)
-				{
-					arg.name = tokens[index-2];
-				}
-				else
-					arg.name = "arg" + Std.string(argCount);
-			
-				arg.type = tokens[index+1];
-				if(arg.type == "struct" || arg.type == "unsigned")
-					arg.type = tokens[index+2];
+				var argTokens:Array<String> = getTokensBetweenParens(tokens, index);
+				arg.type = argTokens.join("");
 				
+				index += argTokens.length + 2;
+				arg.name = tokens[index];
+				
+				++index;
+			
 				method.arguments.push(arg);
-				
-				lastArg = arg;
-			
-				++argCount;
 			}
 			
 			++index;
@@ -239,6 +229,30 @@ class Parser
 		
 		clazz.enumerations.push(enumeration);
 		
+	}
+	
+	public function getTokensBetweenParens(tokens:Array<String>, pos:Int):Array<String>
+	{
+		var returnTokens:Array<String> = [];
+		
+		++pos;
+		var more:Bool = true;
+		var parenCount:Int = 1;
+		while(more && pos < tokens.length)
+		{
+			if(tokens[pos] == "(")
+				++parenCount;
+			else if(tokens[pos] == ")")
+				--parenCount;
+			
+			if(parenCount == 0)
+				more = false;
+			else
+				returnTokens.push(tokens[pos]);
+				
+			++pos;
+		}
+		return returnTokens;
 	}
 	
 	

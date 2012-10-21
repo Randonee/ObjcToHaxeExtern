@@ -12,7 +12,7 @@ class ExternExporterTester extends haxe.unit.TestCase
     	var exporter:ExternExporter = new ExternExporter(new Parser());
     	var method:Method = {name:"foo", arguments:new Array<Argument>(), returnType:"int"};
     	
-    	assertEquals("public override function foo();", exporter.createMethod(method, 0, true) );
+    	assertEquals("public override function foo():Int;", exporter.createMethod(method, 0, true) );
     }
     
 }

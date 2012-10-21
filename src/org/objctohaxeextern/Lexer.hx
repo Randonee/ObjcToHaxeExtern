@@ -2,7 +2,7 @@ package org.objctohaxeextern;
 
 class Lexer
 {
-	private static inline var opperators:Array<String> = [" ", "*", "(", ")", "/" , "-", "+", "@", "<", ">", '"', "'", "=" ,",", ":", ";", "\n", "\t", "\r"];
+	private static inline var opperators:Array<String> = [" ", "*", "(", ")", "/" , "-", "+", "@", "<", ">", '"', "'", "=" ,",", "^", ":", ";", "\n", "\t", "\r"];
 	public var instructionSpansToNextLine(default, null):Bool;
 	
 	private var _inBlockComment:Bool;
@@ -176,6 +176,9 @@ class Lexer
 		str = eReg.replace(str, "");
 		
 		eReg = ~/\bNS_DEPRECATED_IOS\b\(.*\)/g;
+		str = eReg.replace(str, "");
+		
+		eReg = ~/\bNS_AVAILABLE\b\(.*\)/g;
 		str = eReg.replace(str, "");
 		
 		return str;

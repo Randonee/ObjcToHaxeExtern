@@ -153,9 +153,13 @@ class ExternExporter
 		{
 			addTypeUsed(method.arguments[a].type);
 			
+			var argType:String = getHaxeType(method.arguments[a].type);
+			if(argType == "Void")
+				argType = "Dynamic";
+			
 			if(a > 0)
 				contents += ", ";
-			contents += " " + method.arguments[a].name + ":" + getHaxeType(method.arguments[a].type);
+			contents += " " + method.arguments[a].name + ":" + argType;
 		}
 		
 		addTypeUsed(method.returnType);
@@ -202,15 +206,23 @@ class ExternExporter
 	
 	public function getHaxeType(objcType:String):String
 	{
+		var type:String = objcType;
 		if(_typeObjToHaxe.exists(objcType))
-			return _typeObjToHaxe.get(objcType);
+			type = _typeObjToHaxe.get(objcType);
 			
-		return objcType;
+		if(type.charAt(type.length-1) == "*")
+			type = type.substring(0, type.length-1);
+			
+		//Not sure what to do with c Blocks. Making Dynamic for now
+		if(type.indexOf("^") > -1)
+			type = "Dynamic";
+			
+		return type;
 	}
 	
 	private function addTypeUsed(type:String):Void
 	{
-		if(getHaxeType(type) == type)
+		if(type != "void" && getHaxeType(type) == type)
 			_typesUsed.set(type, true);
 	}
 	
@@ -218,13 +230,16 @@ class ExternExporter
 	{
 		_typeObjToHaxe = new Hash<String>();
 		_typeObjToHaxe.set("int", "Int");
+		_typeObjToHaxe.set("unsignedint", "Int");
 		_typeObjToHaxe.set("float", "Float");
 		_typeObjToHaxe.set("bool", "Bool");
 		_typeObjToHaxe.set("BOOL", "Bool");
 		_typeObjToHaxe.set("double", "Float");
-		_typeObjToHaxe.set("NSString", "String");
-		_typeObjToHaxe.set("NSNumber", "Float");
-		_typeObjToHaxe.set("NSDate", "Date");
+		_typeObjToHaxe.set("NSString*", "String");
+		_typeObjToHaxe.set("NSNumber*", "Float");
+		_typeObjToHaxe.set("NSDate*", "Date");
 		_typeObjToHaxe.set("void", "Void");
+		_typeObjToHaxe.set("id", "Dynamic");
+		_typeObjToHaxe.set("void*", "Dynamic");
 	}
 }
