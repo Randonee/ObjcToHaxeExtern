@@ -1,3 +1,4 @@
 -main test.org.objctohaxeextern.TestMain
 -cp src
+-cp out
 -neko test.n

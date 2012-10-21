@@ -106,7 +106,7 @@ class ExternExporter
 	{
 		var contents:String = "extern class " + clazz.name;
 		
-		if(clazz.parentClassName != "")
+		if(clazz.parentClassName != "" && clazz.parentClassName != "NSObject")
 			contents += " extends " + clazz.parentClassName;
 			
 		for(a in 0...clazz.protocols.length)
@@ -179,10 +179,7 @@ class ExternExporter
 		
 		for(a in 0...enumeration.elements.length)
 		{
-			if(a > 0)
-				contents += ",";
-				
-			contents += "\n\t" + enumeration.elements[a];
+			contents += "\n\t" + enumeration.elements[a] + ";";
 		}
 		
 		contents += "\n}";
