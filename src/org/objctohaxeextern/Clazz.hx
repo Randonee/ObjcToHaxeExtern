@@ -46,7 +46,7 @@ class Clazz
 	public var protocols(default, null):Array<String>;
 	public var properties(default, null):Array<Property>;
 	public var methods(default, null):Hash<Array<Method>>;
-	public var staticMethods(default, null):Array<Method>;
+	public var staticMethods(default, null):Hash<Array<Method>>;
 	public var constants(default, null):Array<Constant>;
 	public var enumerations(default, null):Array<Enumeration>;
 	public var savePath(default, default):String;
@@ -58,7 +58,7 @@ class Clazz
 		protocols = [];
 		properties = new Array<Property>();
 		methods = new Hash<Array<Method>>();
-		staticMethods = new Array<Method>();
+		staticMethods = new Hash<Array<Method>>();
 		enumerations = new Array<Enumeration>();
 		constants = [];
 	}
@@ -74,7 +74,10 @@ class Clazz
 	
 	public function addStaticMethod(method:Method):Void
 	{
-		staticMethods.push(method);
+		if(!staticMethods.exists(method.name))
+			staticMethods.set(method.name, new Array<Method>());
+			
+		staticMethods.get(method.name).push(method);
 	}
 
 }

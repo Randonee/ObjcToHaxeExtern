@@ -65,7 +65,7 @@ class ParserTester extends haxe.unit.TestCase
     	
     	parser.parseMethod(tokens, clazz);
     	
-    	var method:Method = clazz.staticMethods[0];
+    	var method:Method = clazz.staticMethods.get("foo")[0];
     	assertEquals("foo", method.name);
     	assertEquals("num", method.arguments[0].name);
     	assertEquals("int", method.arguments[0].type);

@@ -51,8 +51,18 @@ class ExternExporter
 			subContents += "\t" + createConstant(clazz.constants[a]) + "\n";
 		
 		subContents += "\n\t//Static Methods\n";
-		for(a in 0...clazz.staticMethods.length)
-			subContents += "\t" + createStaticMethod(clazz.staticMethods[a]) + "\n";
+	//	for(a in 0...clazz.staticMethods.length)
+	//		subContents += "\t" + createStaticMethod(clazz.staticMethods[a]) + "\n";
+			
+		for(methods in clazz.staticMethods)
+		{
+			for(a in 0...methods.length)
+			{
+				if(a > 0)
+					subContents += "\t" + createOverrloadMeta(methods[a], clazz) + "\n"; 
+				subContents += "\t" + createMethod(methods[a], a, parser.classes.isStaticMothodDefinedInSuperClass(methods[a].name, clazz)) + "\n";
+			}
+		}
 		
 		subContents += "\n\t//Properties\n";
 		for(a in 0...clazz.properties.length)
