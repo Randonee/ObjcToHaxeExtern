@@ -10,7 +10,6 @@ import sys.io.FileOutput;
 class ExternExporter
 {
 	public var parser(default, null):Parser;
-	
 	private var _typesUsed:Hash<Bool>;
 	private var _typeObjToHaxe:Hash<String>;
 	
@@ -38,7 +37,6 @@ class ExternExporter
 	
 	public function createClass(clazz:Clazz):String
 	{
-	
 		var packagePath:String = createClassPackage(clazz);
 		var contents:String = "package " + packagePath + ";\n\n";
 		
@@ -51,8 +49,6 @@ class ExternExporter
 			subContents += "\t" + createConstant(clazz.constants[a]) + "\n";
 		
 		subContents += "\n\t//Static Methods\n";
-	//	for(a in 0...clazz.staticMethods.length)
-	//		subContents += "\t" + createStaticMethod(clazz.staticMethods[a]) + "\n";
 			
 		for(methods in clazz.staticMethods)
 		{
@@ -97,14 +93,12 @@ class ExternExporter
 		}
 		
 		contents += "\n" + subContents;
-		
 		return contents;
 	}
 	
 	public function createOverrloadMeta(method:Method, clazz:Clazz):String
 	{
 		var contents:String = "//@:overload !!NEED CUSTOM META DATA !!";
-		
 		return contents;
 	}
 	
@@ -180,7 +174,7 @@ class ExternExporter
 	
 	public function createEnum(enumeration:Enumeration):String
 	{
-		var contents = "extern " + enumeration.name + "\n";
+		var contents = "extern enum " + enumeration.name + "\n";
 		contents += "{";
 		
 		for(a in 0...enumeration.elements.length)
