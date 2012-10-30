@@ -1,4 +1,4 @@
-Converts objective c class header files to haxe class externs
+Converts Apple objective c class header files to haxe class externs. This app was created to convert apple header files into haxe externs used by https://github.com/ralcr/haxe-objective-c-target
 
 Usage
 
