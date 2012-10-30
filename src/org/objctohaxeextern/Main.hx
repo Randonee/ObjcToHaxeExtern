@@ -16,7 +16,7 @@ class Main
 	{
 		if(Sys.args().length != 2 || Sys.args()[0] == "help" || Sys.args()[0] == "?")
 		{
-			Lib.println("Parses souce directory and sub directories for files ending in \".h\"");
+			Lib.println("Parses source directory and sub directories for files ending in \".h\"");
 			Lib.println("Package path is based on source directory structure.");
 			Lib.println("Example: source/com/somename/SomeHeader.h would become com.somename.SomeHeader.hx");
 			Lib.println(" Usage : neko objctohaxeextern.n /path/to/source /path/to/destination");
