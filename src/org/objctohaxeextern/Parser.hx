@@ -20,8 +20,10 @@ class Parser
 	
 	public function parseDirectory(dirPath:String):Void
 	{
+		neko.Lib.println("-----  Parse startting -----");
 		_pathBase = dirPath;
 		readDirectory(dirPath);
+		neko.Lib.println("-----  Parse Finished ------");
 	}
 	
 	private function readDirectory(dirPath:String):Void
@@ -38,17 +40,24 @@ class Parser
 			}
 			else if( files[a].indexOf(".h") > 0 )
 			{
-				var clazz:Clazz = parseClass(dirPath + "/" + files[a]);
-				clazz.savePath = StringTools.replace(dirPath, _pathBase, "");
+				var clazz:Clazz = parseClass(dirPath + "/" + files[a], StringTools.replace(dirPath, _pathBase, ""));
 				classes.addClass(clazz);
+				neko.Lib.println("Parse " + clazz.name);
 			}
 		}
 	}
 	
-	private function parseClass(filePath:String):Clazz
+	private function parseClass(filePath:String, savePath):Clazz
 	{
 		var lexer:Lexer = new Lexer();
-		var clazz:Clazz = new Clazz();
+		var mainClazz:Clazz = new Clazz();
+		var currentClazz:Clazz = mainClazz;
+		
+		mainClazz.savePath = savePath;
+		
+		var eReg:EReg = ~/([^\/]+)(?=\.\w+$)/;
+		if(eReg.match(filePath))
+			mainClazz.name = eReg.matched(1);
 		
 	    try
 	    {
@@ -56,11 +65,29 @@ class Parser
 	    	var tokens:Array<String> = [];
 			while( true )
 			{
-			
 				if(!lexer.instructionSpansToNextLine && tokens.length > 0)
 				{	
 					if(tokens.length > 0)
-						parseLine(tokens, clazz);
+					{
+						if(tokens[0] == "@" && tokens[1] == "interface" && tokens[2] == mainClazz.name)
+						{
+							currentClazz = mainClazz;
+						}
+						else if(tokens[0] == "@" && tokens[1] == "interface")
+						{
+							
+							currentClazz = new Clazz();
+							mainClazz.classesInSameFile.push(currentClazz);
+						}
+						else if(tokens[0] != "FOUNDATION_EXPORT")
+						{
+							parseLine(tokens, currentClazz);
+							}
+						else
+						{
+							
+						}
+					}
 					tokens = [];
 				}
 				else
@@ -68,13 +95,12 @@ class Parser
 					tokens = tokens.concat( lexer.createTokens(fin.readLine()) );
 				}
 			}
-			
 			fin.close();
 		}
 		catch( ex:haxe.io.Eof ) 
 		{}
 		
-		return clazz;
+		return mainClazz;
 	}
 	
 	public function parseLine(tokens:Array<String>, clazz:Clazz):Void
@@ -86,7 +112,7 @@ class Parser
 			parseMethod(tokens, clazz);
 		else if(tokens[0] == "@" && tokens[1] == "property")
 			parseProperty(tokens, clazz);
-		else if(tokens[0] == "@" && tokens[1] == "interface" && clazz.name == "")	//This just uses the first @inerface in the file
+		else if(tokens[0] == "@" && tokens[1] == "interface")	//This just uses the first @inerface in the file
 			parseClassDefinition(tokens, clazz);
 		else if( tokens[0] == "enum" )
 			parseEnum(tokens, clazz);
@@ -96,7 +122,8 @@ class Parser
 	
 	public function parseClassDefinition(tokens:Array<String>, clazz:Clazz):Void
 	{
-		clazz.name = tokens[2];
+		if(clazz.name == "")
+			clazz.name = tokens[2];
 		
 		var index:Int = 3;
 		if(tokens[index] == ":")
@@ -117,14 +144,28 @@ class Parser
 		}
 	}
 	
+	public function isOnlyAvaialbleInSDK(str:String):Bool
+	{
+		if(str == "NS_AVAILABLE_IOS" || str == "bNS_DEPRECATED_IOS" || str == "bNS_AVAILABLE")
+			return true;
+			
+		return false;
+	}
+	
 	public function parseMethod(tokens:Array<String>, clazz:Clazz):Void
 	{
 		//token structure:[ "-", "(", "retyrnType", ")", "name", ":", "(", "arg1ype", ")", "name", ":", "(", "arg2type", ")"  ]
 	
-		var method:Method = {name:"", arguments:new Array<Argument>(), returnType:""};
+		var method:Method = {name:"", arguments:new Array<Argument>(), sdk:"", returnType:""};
 		var isStatic:Bool = (tokens[0] == "+");
 		
 		method.returnType = getTokensBetweenParens(tokens, 1).join("");
+		
+		if(isOnlyAvaialbleInSDK(tokens[tokens.length - 4]))
+		{
+			method.sdk = "ios_" + tokens[tokens.length-2];
+			tokens = tokens.slice(0, tokens.length - 4);
+		}
 		
 		var index:Int=0;
 		while(index < tokens.length && tokens[index] != ")")
@@ -133,7 +174,6 @@ class Parser
 		++index;
 		method.name = tokens[index];
 		++index;
-		
 		while(index < tokens.length)
 		{
 			if(tokens[index] == "(")
@@ -167,7 +207,13 @@ class Parser
 		if(tokens[tokens.length - 1] == ";")
 			tokens.pop();
 		
-		var property:Property = {name:"", readOnly:false, type:""};
+		var property:Property = {name:"", readOnly:false, sdk:"", type:""};
+		
+		if(isOnlyAvaialbleInSDK(tokens[tokens.length - 4]))
+		{
+			property.sdk = "ios_" + tokens[tokens.length-2];
+			tokens = tokens.slice(0, tokens.length - 4);
+		}
 		
 		var a:Int = 0;
 		while(a < tokens.length && !property.readOnly)

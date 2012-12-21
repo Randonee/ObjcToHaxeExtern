@@ -10,6 +10,7 @@ typedef Property =
 {
 	name:String,
 	readOnly:Bool,
+	sdk:String,
 	type:String
 }
 
@@ -17,6 +18,7 @@ typedef Method =
 {
 	name:String,
 	arguments:Array<Argument>,
+	sdk:String,
 	returnType:String
 }
 
@@ -50,17 +52,20 @@ class Clazz
 	public var constants(default, null):Array<Constant>;
 	public var enumerations(default, null):Array<Enumeration>;
 	public var savePath(default, default):String;
+	public var classesInSameFile(default, default):Array<Clazz>;
 	
 	public function new(?name:String = ""):Void
 	{
 		this.name = name;
 		parentClassName = "";
+		savePath = "";
 		protocols = [];
 		properties = new Array<Property>();
 		methods = new Hash<Array<Method>>();
 		staticMethods = new Hash<Array<Method>>();
 		enumerations = new Array<Enumeration>();
 		constants = [];
+		classesInSameFile = [];
 	}
 	
 	

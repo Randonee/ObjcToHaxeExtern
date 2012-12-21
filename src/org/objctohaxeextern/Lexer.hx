@@ -76,6 +76,7 @@ class Lexer
 								a += comment.length;
 								if(charIs(text, "*", a-1))
 									more = false;
+									++a;
 							}
 							else
 								++a;
@@ -169,16 +170,10 @@ class Lexer
 	
 	public function removeNSAvailables(str:String):String
 	{
-		var eReg:EReg = ~/\bNS_AVAILABLE_IOS\b\(.*\)/g;
-		str = eReg.replace(str, "");
-		 
-		eReg = ~/\bNS_CLASS_AVAILABLE_IOS\b\(.*\)/g;
+		var eReg:EReg = ~/\bNS_CLASS_AVAILABLE_IOS\b\(.*\)/g;
 		str = eReg.replace(str, "");
 		
 		eReg = ~/\bNS_DEPRECATED_IOS\b\(.*\)/g;
-		str = eReg.replace(str, "");
-		
-		eReg = ~/\bNS_AVAILABLE\b\(.*\)/g;
 		str = eReg.replace(str, "");
 		
 		return str;

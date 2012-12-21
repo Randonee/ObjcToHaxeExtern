@@ -22,24 +22,80 @@ class ExternExporter
 	
 	public function export(destinationDirectory:String):Void
 	{
+		neko.Lib.println("-----  Export startting -----");
 		Util.deleteDirectory(destinationDirectory);
 		Util.createDirectory(destinationDirectory);
 		
+		var fout:FileOutput;
+		var content:String = "";
+		var savePath:String = "";
 		for(clazz in parser.classes.items)
 		{
-			var saveDir:String = destinationDirectory + "/" + clazz.savePath;
-			Util.createDirectory(saveDir);
-			var fout:FileOutput = File.write(saveDir + "/" + clazz.name + ".hx", false);
-			fout.writeString(createClass(clazz));
-			fout.close();
+			if(clazz.savePath != "")
+			{
+				if(content != "")
+				{
+					saveClass(savePath, content);
+					content = "";
+					
+					neko.Lib.println("Export " + clazz.name);
+				}
+				
+				savePath = destinationDirectory + "/" + clazz.savePath + "/" + clazz.name + ".hx";
+				Util.createDirectory(destinationDirectory + "/" + clazz.savePath + "/");
+				
+				content += createClass(clazz);
+				neko.Lib.println(clazz.name);
+			}
 		}
+		
+		if(content != "")
+			saveClass(savePath, content);
+			
+		neko.Lib.println("-----  Export Finished -----");
 	}
+	
+	private function saveClass(path:String, content:String):Void
+	{
+		var fout:FileOutput = File.write(path , false);
+		fout.writeString(content);
+		fout.close();
+	}
+	
 	
 	public function createClass(clazz:Clazz):String
 	{
-		var packagePath:String = createClassPackage(clazz);
-		var contents:String = "package " + packagePath + ";\n\n";
+		var contents:String = "";
+		var packagePath:String = "";
+	
+		packagePath = createClassPackage(clazz);
+		contents += "package " + packagePath + ";\n\n";
 		
+		var subContents:String = createActuallClass(clazz);
+		
+		for(a in 0...clazz.classesInSameFile.length)
+			subContents += createActuallClass(clazz.classesInSameFile[a]);
+		
+			
+		//imports
+		for(type in _typesUsed.keys())
+		{
+			if(parser.classes.items.exists(type) )
+			{
+				var importClass:Clazz = parser.classes.items.get(type);
+				var importPackage:String = createClassPackage(importClass);
+				if(packagePath != importPackage)
+					contents += "import " + importPackage + "." + importClass.name + ";\n" ;
+			}
+		}
+		
+		contents += "\n" + subContents;
+		return contents;
+	}
+	
+	
+	private function createActuallClass(clazz:Clazz):String
+	{
 		var subContents:String = createClassDefinition(clazz);
 		subContents += "\n{\n";
 		
@@ -80,20 +136,8 @@ class ExternExporter
 		for(a in 0...clazz.enumerations.length)
 			subContents += createEnum(clazz.enumerations[a]) + "\n\n";
 			
-		//imports
-		for(type in _typesUsed.keys())
-		{
-			if(parser.classes.items.exists(type) )
-			{
-				var importClass:Clazz = parser.classes.items.get(type);
-				var importPackage:String = createClassPackage(importClass);
-				if(packagePath != importPackage)
-					contents += "import " + importPackage + "." + importClass.name + ";\n" ;
-			}
-		}
-		
-		contents += "\n" + subContents;
-		return contents;
+			
+		return subContents;
 	}
 	
 	public function createOverrloadMeta(method:Method, clazz:Clazz):String
@@ -130,6 +174,9 @@ class ExternExporter
 			
 		contents += ":" + getHaxeType(property.type) + ";";
 		
+		if(property.sdk != "")
+			contents = "@:require(" + property.sdk + ") " + contents;
+		
 		addTypeUsed(property.type);
 		return contents;
 	}
@@ -142,6 +189,10 @@ class ExternExporter
 	public function createMethod(method:Method, ?overloadNum:Int = 0, ?overrides:Bool=false):String
 	{
 		var contents = "public " ;
+		
+		
+		if(method.sdk != "")
+			contents = "@:require(" + method.sdk + ") " + contents;
 		
 		if(overrides)
 			contents += "override";
@@ -189,7 +240,7 @@ class ExternExporter
 	
 	public function createConstant(constant:Constant):String
 	{
-		var contents = "static public inline var " + constant.name + ":" + constant.type + ";";
+		var contents = "//static public inline var " + constant.name + ":" + constant.type + ";";
 		addTypeUsed(constant.type);
 		return contents;
 	}
@@ -231,8 +282,10 @@ class ExternExporter
 	{
 		_typeObjToHaxe = new Hash<String>();
 		_typeObjToHaxe.set("int", "Int");
+		_typeObjToHaxe.set("NSInteger", "Int");
 		_typeObjToHaxe.set("unsignedint", "Int");
 		_typeObjToHaxe.set("float", "Float");
+		_typeObjToHaxe.set("NSTimeInterval", "Float");
 		_typeObjToHaxe.set("bool", "Bool");
 		_typeObjToHaxe.set("BOOL", "Bool");
 		_typeObjToHaxe.set("double", "Float");
@@ -241,6 +294,7 @@ class ExternExporter
 		_typeObjToHaxe.set("NSDate*", "Date");
 		_typeObjToHaxe.set("void", "Void");
 		_typeObjToHaxe.set("id", "Dynamic");
+		_typeObjToHaxe.set("Class", "Class<Dynamic>");
 		_typeObjToHaxe.set("void*", "Dynamic");
 	}
 }
