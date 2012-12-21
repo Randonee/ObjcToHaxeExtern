@@ -28,6 +28,12 @@ typedef Enumeration =
 	elements:Array<String>
 }
 
+typedef Structure = 
+{
+	name:String,
+	properties:Array<Property>
+}
+
 typedef StaticProperty = 
 {
 	name:String,
@@ -51,6 +57,7 @@ class Clazz
 	public var staticMethods(default, null):Hash<Array<Method>>;
 	public var constants(default, null):Array<Constant>;
 	public var enumerations(default, null):Array<Enumeration>;
+	public var structures(default, null):Array<Structure>;
 	public var savePath(default, default):String;
 	public var classesInSameFile(default, default):Array<Clazz>;
 	
@@ -64,6 +71,7 @@ class Clazz
 		methods = new Hash<Array<Method>>();
 		staticMethods = new Hash<Array<Method>>();
 		enumerations = new Array<Enumeration>();
+		structures = new Array<Structure>();
 		constants = [];
 		classesInSameFile = [];
 	}

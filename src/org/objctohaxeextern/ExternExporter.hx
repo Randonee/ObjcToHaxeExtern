@@ -45,7 +45,6 @@ class ExternExporter
 				Util.createDirectory(destinationDirectory + "/" + clazz.savePath + "/");
 				
 				content += createClass(clazz);
-				neko.Lib.println(clazz.name);
 			}
 		}
 		
@@ -96,6 +95,9 @@ class ExternExporter
 	
 	private function createActuallClass(clazz:Clazz):String
 	{
+		if(clazz.name == "NSMutableArray")
+		 return "";
+	
 		var subContents:String = createClassDefinition(clazz);
 		subContents += "\n{\n";
 		
@@ -136,6 +138,9 @@ class ExternExporter
 		for(a in 0...clazz.enumerations.length)
 			subContents += createEnum(clazz.enumerations[a]) + "\n\n";
 			
+		for(a in 0...clazz.structures.length)
+			subContents += createStructure(clazz.structures[a]) + "\n\n";
+			
 			
 		return subContents;
 	}
@@ -150,7 +155,7 @@ class ExternExporter
 	{
 		var contents:String = "extern class " + clazz.name;
 		
-		if(clazz.parentClassName != "" && clazz.parentClassName != "NSObject")
+		if(clazz.parentClassName != "")
 			contents += " extends " + clazz.parentClassName;
 			
 		for(a in 0...clazz.protocols.length)
@@ -238,6 +243,21 @@ class ExternExporter
 		return contents;
 	}
 	
+	public function createStructure(structure:Structure):String
+	{
+		var contents = "typedef " + structure.name + "\n";
+		contents += "{";
+		
+		for(a in 0...structure.properties.length)
+		{
+			contents += "\n\t var " + structure.properties[a].name + ":" + structure.properties[a].type + ";";
+		}
+		
+		contents += "\n}";
+		
+		return contents;
+	}
+	
 	public function createConstant(constant:Constant):String
 	{
 		var contents = "//static public inline var " + constant.name + ":" + constant.type + ";";
@@ -261,6 +281,9 @@ class ExternExporter
 		var type:String = objcType;
 		if(_typeObjToHaxe.exists(objcType))
 			type = _typeObjToHaxe.get(objcType);
+			
+		if(objcType.indexOf("[]") >= 0)
+			return "Array<Dynamic>";
 			
 		if(type.charAt(type.length-1) == "*")
 			type = type.substring(0, type.length-1);
@@ -286,15 +309,21 @@ class ExternExporter
 		_typeObjToHaxe.set("unsignedint", "Int");
 		_typeObjToHaxe.set("float", "Float");
 		_typeObjToHaxe.set("NSTimeInterval", "Float");
+		_typeObjToHaxe.set("UILayoutPriority", "Float");
+		_typeObjToHaxe.set("CGFloat", "Float");
 		_typeObjToHaxe.set("bool", "Bool");
 		_typeObjToHaxe.set("BOOL", "Bool");
 		_typeObjToHaxe.set("double", "Float");
 		_typeObjToHaxe.set("NSString*", "String");
 		_typeObjToHaxe.set("NSNumber*", "Float");
 		_typeObjToHaxe.set("NSDate*", "Date");
+		_typeObjToHaxe.set("NSString*", "String");
+		_typeObjToHaxe.set("NSString", "String");
 		_typeObjToHaxe.set("void", "Void");
 		_typeObjToHaxe.set("id", "Dynamic");
 		_typeObjToHaxe.set("Class", "Class<Dynamic>");
 		_typeObjToHaxe.set("void*", "Dynamic");
+		_typeObjToHaxe.set("NSArray*", "Array<Dynamic>");
+		_typeObjToHaxe.set("NSArray", "Array<Dynamic>");
 	}
 }

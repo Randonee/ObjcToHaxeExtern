@@ -113,11 +113,23 @@ class Lexer
 		{
 			//typedef NS_ENUM(NSInteger, UIViewContentMode) {
 		
-			tokens = tokens.slice(5);
-			tokens[1] = tokens[0];
-			tokens[0] = "enum";
+			if(tokens[0] != "enum")
+			{
+				tokens = tokens.slice(5);
+				tokens[1] = tokens[0];
+				tokens[0] = "enum";
+			}
 			
 			if(!containsChar(text, "}", 0))
+				instructionSpansToNextLine = true;
+		}
+		else if(tokens[0] == "struct" || tokens[1] == "struct")
+		{
+			if(tokens[1] == "struct")
+				tokens.shift();
+			
+			
+			if(!containsChar(text, "}", 0) && !containsChar(text, ";", 0))
 				instructionSpansToNextLine = true;
 		}
 		else if(instructionSpansToNextLine && containsChar(text, "}", 0))

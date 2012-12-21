@@ -72,21 +72,19 @@ class Parser
 						if(tokens[0] == "@" && tokens[1] == "interface" && tokens[2] == mainClazz.name)
 						{
 							currentClazz = mainClazz;
+							parseLine(tokens, currentClazz);
 						}
 						else if(tokens[0] == "@" && tokens[1] == "interface")
 						{
-							
 							currentClazz = new Clazz();
 							mainClazz.classesInSameFile.push(currentClazz);
+							parseLine(tokens, currentClazz);
 						}
 						else if(tokens[0] != "FOUNDATION_EXPORT")
 						{
 							parseLine(tokens, currentClazz);
-							}
-						else
-						{
-							
 						}
+						
 					}
 					tokens = [];
 				}
@@ -112,19 +110,21 @@ class Parser
 			parseMethod(tokens, clazz);
 		else if(tokens[0] == "@" && tokens[1] == "property")
 			parseProperty(tokens, clazz);
-		else if(tokens[0] == "@" && tokens[1] == "interface")	//This just uses the first @inerface in the file
+		else if(tokens[0] == "@" && tokens[1] == "interface")
 			parseClassDefinition(tokens, clazz);
 		else if( tokens[0] == "enum" )
 			parseEnum(tokens, clazz);
 		else if( tokens[0] == "const" || tokens[1] == "const" )
 			parseConstant(tokens, clazz);
+		else if( tokens[0] == "struct" )
+			parseStructure(tokens, clazz);
 	}
 	
 	public function parseClassDefinition(tokens:Array<String>, clazz:Clazz):Void
 	{
 		if(clazz.name == "")
 			clazz.name = tokens[2];
-		
+			
 		var index:Int = 3;
 		if(tokens[index] == ":")
 		{
@@ -186,6 +186,12 @@ class Parser
 				index += argTokens.length + 2;
 				arg.name = tokens[index];
 				
+				if(arg.name == null || arg.type.indexOf(",") >= 0 )
+				{
+					neko.Lib.println("-- method skipped: " + method.name);
+					return;
+				}
+				
 				++index;
 			
 				method.arguments.push(arg);
@@ -246,17 +252,14 @@ class Parser
 	public function parseEnum(tokens:Array<String>, clazz:Clazz):Void
 	{
 		var enumeration:Enumeration = {name:tokens[1], elements:new Array<String>()};
-		
 		var index:Int = 0;
 		
 		while(index < tokens.length && tokens[index] != "{")
 			++index;
 			
 		++index;
-		
 		while(index < tokens.length && tokens[index] != "}")
 		{
-		
 			if(enumeration.elements.length == 0)
 				enumeration.elements.push(tokens[index]);
 			else
@@ -269,12 +272,45 @@ class Parser
 				if(index < tokens.length && tokens[index] != "}")
 					enumeration.elements.push(tokens[index]);
 			}
-		
 			++index;
 		}
-		
 		clazz.enumerations.push(enumeration);
+	}
+	
+	public function parseStructure(tokens:Array<String>, clazz:Clazz):Void
+	{
+		if(tokens[1] == "{")
+			return;
+	
+		var structure:Structure = {name:tokens[1], properties:new Array<Property>()};
 		
+		var index:Int = 0;
+		while(index < tokens.length && tokens[index] != "{")
+			++index;
+			
+		++index;
+		while(index < tokens.length && tokens[index] != "}")
+		{
+			var prop:Property = {name:"", readOnly:false, sdk:"", type:""};
+			prop.type = tokens[index];
+			++index;
+			prop.name = tokens[index];
+			structure.properties.push(prop);
+			
+			while(index < tokens.length && tokens[index] != ";")
+			{
+				if(tokens[index] == ",")
+				{
+					var prop2:Property = {name:tokens[index+1], readOnly:false, sdk:"", type:prop.type};
+					structure.properties.push(prop2);
+				}
+				++index;
+			}
+				
+			++index;
+		}
+		if(structure.properties.length > 0)
+			clazz.structures.push(structure);
 	}
 	
 	public function getTokensBetweenParens(tokens:Array<String>, pos:Int):Array<String>
