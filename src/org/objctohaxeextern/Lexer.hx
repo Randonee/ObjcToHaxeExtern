@@ -125,10 +125,6 @@ class Lexer
 		}
 		else if(tokens[0] == "struct" || tokens[1] == "struct")
 		{
-			if(tokens[1] == "struct")
-				tokens.shift();
-			
-			
 			if(!containsChar(text, "}", 0) && !containsChar(text, ";", 0))
 				instructionSpansToNextLine = true;
 		}

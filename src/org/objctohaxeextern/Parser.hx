@@ -40,9 +40,9 @@ class Parser
 			}
 			else if( files[a].indexOf(".h") > 0 )
 			{
+				neko.Lib.println("Parse: " + files[a]);
 				var clazz:Clazz = parseClass(dirPath + "/" + files[a], StringTools.replace(dirPath, _pathBase, ""));
 				classes.addClass(clazz);
-				neko.Lib.println("Parse " + clazz.name);
 			}
 		}
 	}
@@ -69,16 +69,24 @@ class Parser
 				{	
 					if(tokens.length > 0)
 					{
-						if(tokens[0] == "@" && tokens[1] == "interface" && tokens[2] == mainClazz.name)
+						if(isClass(tokens) && tokens[2] == mainClazz.name)
 						{
 							currentClazz = mainClazz;
+							currentClazz.hasDefinition = true;
 							parseLine(tokens, currentClazz);
+							currentClazz.isProtocol = (tokens[1] == "protocol");
 						}
-						else if(tokens[0] == "@" && tokens[1] == "interface")
+						else if(isClass(tokens))
 						{
-							currentClazz = new Clazz();
-							mainClazz.classesInSameFile.push(currentClazz);
+							currentClazz = mainClazz.getClassesInSameFile(tokens[2]);
+							if(currentClazz == null)
+							{
+								currentClazz = new Clazz();
+								currentClazz.hasDefinition = true;
+								mainClazz.classesInSameFile.push(currentClazz);
+							}
 							parseLine(tokens, currentClazz);
+							
 						}
 						else if(tokens[0] != "FOUNDATION_EXPORT")
 						{
@@ -101,6 +109,14 @@ class Parser
 		return mainClazz;
 	}
 	
+	public function isClass(tokens:Array<String>):Bool
+	{
+		if(tokens[0] == "@" && (tokens[1] == "interface" || tokens[1] == "protocol"))
+			return true;
+			
+		return false;
+	}
+	
 	public function parseLine(tokens:Array<String>, clazz:Clazz):Void
 	{
 		if(tokens[tokens.length-1] == ";")
@@ -110,13 +126,13 @@ class Parser
 			parseMethod(tokens, clazz);
 		else if(tokens[0] == "@" && tokens[1] == "property")
 			parseProperty(tokens, clazz);
-		else if(tokens[0] == "@" && tokens[1] == "interface")
+		else if(isClass(tokens))
 			parseClassDefinition(tokens, clazz);
 		else if( tokens[0] == "enum" )
 			parseEnum(tokens, clazz);
 		else if( tokens[0] == "const" || tokens[1] == "const" )
 			parseConstant(tokens, clazz);
-		else if( tokens[0] == "struct" )
+		else if( tokens[0] == "struct" || tokens[1] == "struct")
 			parseStructure(tokens, clazz);
 	}
 	
@@ -124,6 +140,9 @@ class Parser
 	{
 		if(clazz.name == "")
 			clazz.name = tokens[2];
+			
+		if(tokens[1] == "protocol")
+			clazz.isProtocol = true;
 			
 		var index:Int = 3;
 		if(tokens[index] == ":")
@@ -138,7 +157,9 @@ class Parser
 			while(index < tokens.length && tokens[index] != ">")
 			{
 				if(tokens[index] == "," || tokens[index] == "<")
+				{
 					clazz.protocols.push(tokens[index + 1]);
+				}
 				++index;
 			}
 		}
@@ -199,6 +220,11 @@ class Parser
 			
 			++index;
 		}
+		
+		if(method.name == "class")
+			method.name = "clazz";
+		else if(method.name == "new")
+			method.name = "createNew";
 		
 		if(isStatic)
 			clazz.addStaticMethod(method);
@@ -279,22 +305,61 @@ class Parser
 	
 	public function parseStructure(tokens:Array<String>, clazz:Clazz):Void
 	{
-		if(tokens[1] == "{")
-			return;
-	
-		var structure:Structure = {name:tokens[1], properties:new Array<Property>()};
+		var name:String = "";
 		
 		var index:Int = 0;
 		while(index < tokens.length && tokens[index] != "{")
 			++index;
+		
+		if(tokens[0] == "typedef")
+			name = tokens[tokens.length-1];
+		else
+			name = tokens[index-1];
+		
+		if(name == "struct")
+			return;
+	
+		var structure:Structure = {name:name, properties:new Array<Property>()};
+		
+		
 			
 		++index;
 		while(index < tokens.length && tokens[index] != "}")
 		{
 			var prop:Property = {name:"", readOnly:false, sdk:"", type:""};
-			prop.type = tokens[index];
+			var more:Bool = true;
+			
+			while(more)
+			{
+				if(tokens[index] != "unsigned" )
+					more = false;
+				else
+				{
+					prop.type += tokens[index];
+					++index;
+				}
+			}
+			
+			prop.type += tokens[index];
 			++index;
+			
+			while(tokens[index] == "__unsafe_unretained")
+				++index;
+			
+			while(tokens[index] == "*")
+			{
+				prop.type += tokens[index];
+				++index;
+			}
+			
 			prop.name = tokens[index];
+			
+			if(prop.name.indexOf("[") >= 0)
+			{
+				prop.name = prop.name.substring(0, prop.name.indexOf("["));
+				prop.type = "NSArray";
+			}
+			
 			structure.properties.push(prop);
 			
 			while(index < tokens.length && tokens[index] != ";")

@@ -14,7 +14,7 @@
 		
 		<exec dir="." failonerror="true" executable="neko">
 			<arg line="objctohaxeextern.n" />
-			<arg line="in" />
+			<arg line="in/" />
 			<arg line="out" />
 		</exec>
 	</target>

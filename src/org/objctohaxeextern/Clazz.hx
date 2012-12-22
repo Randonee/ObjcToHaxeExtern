@@ -52,20 +52,24 @@ class Clazz
 	public var name(default, default):String;
 	public var parentClassName(default, default):String;
 	public var protocols(default, null):Array<String>;
-	public var properties(default, null):Array<Property>;
-	public var methods(default, null):Hash<Array<Method>>;
-	public var staticMethods(default, null):Hash<Array<Method>>;
+	public var properties(default, default):Array<Property>;
+	public var methods(default, default):Hash<Array<Method>>;
+	public var staticMethods(default, default):Hash<Array<Method>>;
 	public var constants(default, null):Array<Constant>;
 	public var enumerations(default, null):Array<Enumeration>;
 	public var structures(default, null):Array<Structure>;
 	public var savePath(default, default):String;
 	public var classesInSameFile(default, default):Array<Clazz>;
+	public var isProtocol(default, default):Bool;
+	public var hasDefinition(default, default):Bool;
 	
 	public function new(?name:String = ""):Void
 	{
+		hasDefinition = false;
 		this.name = name;
 		parentClassName = "";
 		savePath = "";
+		isProtocol = false;
 		protocols = [];
 		properties = new Array<Property>();
 		methods = new Hash<Array<Method>>();
@@ -76,6 +80,28 @@ class Clazz
 		classesInSameFile = [];
 	}
 	
+	public function getClassesInSameFile(name:String):Clazz
+	{
+		for(a in 0...classesInSameFile.length)
+		{
+			if(classesInSameFile[a].name == name)
+				return classesInSameFile[a];
+		}
+		
+		return null;
+	}
+	
+	
+	public function isStaticMethodDefined(name:String):Bool
+	{
+		return staticMethods.exists(name);
+	}
+	
+	
+	public function isMethodDefined(name:String):Bool
+	{
+		return methods.exists(name);
+	}
 	
 	public function addMethod(method:Method):Void
 	{
