@@ -29,6 +29,20 @@ class ClassCollection
 		return false;
 	}
 	
+	public function doesSuperClassImplementProtocol(protocol:String, clazz:Clazz):Bool
+	{
+		var parentClass:Clazz = getClassForType(clazz.parentClassName);
+	
+		if(parentClass != null)
+		{
+			if(parentClass.doesImplementProtocol(protocol))
+				return true;
+			else
+				return doesSuperClassImplementProtocol(protocol, parentClass);
+		}
+		return false;
+	}
+	
 	public function getClassForType(type:String):Clazz
 	{
 		if(items.exists(type))

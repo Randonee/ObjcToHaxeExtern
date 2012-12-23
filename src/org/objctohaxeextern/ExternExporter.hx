@@ -219,7 +219,7 @@ class ExternExporter
 		var firstImpementAdded:Bool = true;
 		for(a in 0...clazz.protocols.length)
 		{
-			if(clazz.protocols[a] != clazz.name && clazz.protocols[a] != "NSObject")
+			if(clazz.protocols[a] != clazz.name && clazz.protocols[a] != "NSObject" && !parser.classes.doesSuperClassImplementProtocol(clazz.protocols[a], clazz))
 			{
 				if(!firstImpementAdded || clazz.parentClassName != "")
 				{

@@ -103,6 +103,16 @@ class Clazz
 		return methods.exists(name);
 	}
 	
+	public function doesImplementProtocol(name:String):Bool
+	{
+		for(a in 0...protocols.length)
+		{
+			if(protocols[a] == name)
+				return true;
+		}
+		return false;
+	}
+	
 	public function addMethod(method:Method):Void
 	{
 		if(!methods.exists(method.name))
