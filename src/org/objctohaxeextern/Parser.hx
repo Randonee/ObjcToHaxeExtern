@@ -199,7 +199,10 @@ class Parser
 		{
 			if(tokens[index] == "(")
 			{
-				var arg:Argument = {type:"", name:""};
+				var arg:Argument = {type:"", name:"", descriptor:""};
+				
+				if(method.arguments.length != 0)
+					arg.descriptor = tokens[index-2];
 				
 				var argTokens:Array<String> = getTokensBetweenParens(tokens, index);
 				arg.type = argTokens.join("");

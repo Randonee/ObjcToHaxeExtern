@@ -116,4 +116,16 @@ class ClassCollection
 		return false;
 	}
 	
+	
+	public function deosClassExtendFromClass(childClass:Clazz, baseClassName:String):Bool
+	{
+		if(childClass == null)
+			return false;
+	
+		if(childClass.name == baseClassName)
+			return true;
+			
+		return deosClassExtendFromClass(getClassForType(childClass.parentClassName), baseClassName);
+	}
+	
 }

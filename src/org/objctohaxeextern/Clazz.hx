@@ -3,7 +3,8 @@ package org.objctohaxeextern;
 typedef Argument = 
 {
 	type:String,
-	name:String
+	name:String,
+	descriptor:String
 }
 
 typedef Property = 

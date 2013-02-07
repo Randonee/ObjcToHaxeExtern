@@ -16,8 +16,22 @@
 			<arg line="objctohaxeextern.n" />
 			<arg line="in/" />
 			<arg line="out" />
+			<arg line="objc" />
 		</exec>
 	</target>
+	
+	<target name="basis">
+			<exec dir="." failonerror="true" executable="haxe">
+				<arg line="build.hxml" />
+			</exec>
+			
+			<exec dir="." failonerror="true" executable="neko">
+				<arg line="objctohaxeextern.n" />
+				<arg line="in/" />
+				<arg line="out" />
+				<arg line="basis" />
+			</exec>
+		</target>
 	
 	<target name="test">
 		<exec dir="." failonerror="true" executable="haxe">
