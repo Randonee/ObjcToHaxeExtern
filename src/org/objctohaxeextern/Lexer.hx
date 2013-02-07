@@ -181,9 +181,6 @@ class Lexer
 		var eReg:EReg = ~/\bNS_CLASS_AVAILABLE_IOS\b\(.*\)/g;
 		str = eReg.replace(str, "");
 		
-		eReg = ~/\bNS_DEPRECATED_IOS\b\(.*\)/g;
-		str = eReg.replace(str, "");
-		
 		return str;
 	}
 	

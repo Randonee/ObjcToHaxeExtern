@@ -12,7 +12,8 @@ typedef Property =
 	name:String,
 	readOnly:Bool,
 	sdk:String,
-	type:String
+	type:String,
+	deprecated:Bool
 }
 
 typedef Method = 
@@ -20,13 +21,21 @@ typedef Method =
 	name:String,
 	arguments:Array<Argument>,
 	sdk:String,
-	returnType:String
+	returnType:String,
+	deprecated:Bool
+}
+
+
+typedef EnumerationElement = 
+{
+	name:String,
+	value:String
 }
 
 typedef Enumeration = 
 {
 	name:String,
-	elements:Array<String>
+	elements:Array<EnumerationElement>
 }
 
 typedef Structure = 

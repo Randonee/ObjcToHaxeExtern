@@ -173,11 +173,16 @@ class Parser
 		return false;
 	}
 	
+	public function isDeprecated(str:String):Bool
+	{
+		return (str.indexOf("DEPRECATED") >= 0);
+	}
+	
 	public function parseMethod(tokens:Array<String>, clazz:Clazz):Void
 	{
 		//token structure:[ "-", "(", "retyrnType", ")", "name", ":", "(", "arg1ype", ")", "name", ":", "(", "arg2type", ")"  ]
 	
-		var method:Method = {name:"", arguments:new Array<Argument>(), sdk:"", returnType:""};
+		var method:Method = {name:"", arguments:new Array<Argument>(), sdk:"", returnType:"", deprecated:isDeprecated(tokens.join(""))};
 		var isStatic:Bool = (tokens[0] == "+");
 		
 		method.returnType = getTokensBetweenParens(tokens, 1).join("");
@@ -242,7 +247,8 @@ class Parser
 		if(tokens[tokens.length - 1] == ";")
 			tokens.pop();
 		
-		var property:Property = {name:"", readOnly:false, sdk:"", type:""};
+		var property:Property = {name:"", readOnly:false, sdk:"", type:"", deprecated:isDeprecated(tokens.join(""))};
+		
 		
 		if(isOnlyAvaialbleInSDK(tokens[tokens.length - 4]))
 		{
@@ -262,7 +268,7 @@ class Parser
 		{
 			property.name = tokens[tokens.length-3];
 			if(tokens[tokens.length-4] == "*")
-				property.type = tokens[tokens.length-5];
+				property.type = tokens[tokens.length-5] + "*";
 			else
 				property.type = tokens[tokens.length-4];
 		}
@@ -270,7 +276,7 @@ class Parser
 		{
 			property.name = tokens[tokens.length-1];
 			if(tokens[tokens.length-2] == "*")
-				property.type = tokens[tokens.length-3];
+				property.type = tokens[tokens.length-3] + "*";
 			else
 				property.type = tokens[tokens.length-2];
 		}
@@ -280,26 +286,40 @@ class Parser
 	
 	public function parseEnum(tokens:Array<String>, clazz:Clazz):Void
 	{
-		var enumeration:Enumeration = {name:tokens[1], elements:new Array<String>()};
+		var enumeration:Enumeration = {name:tokens[1], elements:new Array<EnumerationElement>()};
 		var index:Int = 0;
 		
 		while(index < tokens.length && tokens[index] != "{")
 			++index;
 			
 		++index;
+		var element:EnumerationElement = {name:"", value:""};
+		
 		while(index < tokens.length && tokens[index] != "}")
 		{
+			
 			if(enumeration.elements.length == 0)
-				enumeration.elements.push(tokens[index]);
+			{
+				element.name = tokens[index];
+				enumeration.elements.push(element);
+				
+			}
 			else
 			{
 				while(index < tokens.length && tokens[index] != ",")
+				{
 					++index;
 					
+					if(tokens[index] == "<" && tokens[index + 1] == "<")
+						element.value = tokens[index - 1] + " << " + tokens[index + 2];
+				}
 				++index;
 				
 				if(index < tokens.length && tokens[index] != "}")
-					enumeration.elements.push(tokens[index]);
+				{
+					element = {name:tokens[index], value:""};
+					enumeration.elements.push(element);
+				}
 			}
 			++index;
 		}
@@ -329,7 +349,7 @@ class Parser
 		++index;
 		while(index < tokens.length && tokens[index] != "}")
 		{
-			var prop:Property = {name:"", readOnly:false, sdk:"", type:""};
+			var prop:Property = {name:"", readOnly:false, sdk:"", type:"", deprecated:false};
 			var more:Bool = true;
 			
 			while(more)
@@ -369,7 +389,7 @@ class Parser
 			{
 				if(tokens[index] == ",")
 				{
-					var prop2:Property = {name:tokens[index+1], readOnly:false, sdk:"", type:prop.type};
+					var prop2:Property = {name:tokens[index+1], readOnly:false, sdk:"", type:prop.type, deprecated:false};
 					structure.properties.push(prop2);
 				}
 				++index;

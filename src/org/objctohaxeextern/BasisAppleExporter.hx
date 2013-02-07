@@ -9,6 +9,8 @@ import sys.io.FileOutput;
 
 class BasisAppleExporter
 {
+	private static inline var TYPES_TO_IGNORE:Array<String> = ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", "UIGestureRecognizer", "UIEvent"];
+
 	public var parser(default, null):Parser;
 	private var _typesUsed:Hash<Bool>;
 	private var _typeObjToHaxe:Hash<String>;
@@ -20,11 +22,14 @@ class BasisAppleExporter
 	private var _currentCppClassContent:String;
 	private var _currentHxClassContent:String;
 	
+	private var _enumNames:Array<String>;
+	
 	
 	public function new(parser:Parser):Void
 	{
 		this.parser = parser;
 		createTypeConversionHash();
+		_enumNames = [];
 	}
 	
 	public function export(destinationDirectory:String):Void
@@ -32,6 +37,19 @@ class BasisAppleExporter
 		neko.Lib.println("-----  Export startting -----");
 		Util.deleteDirectory(destinationDirectory);
 		Util.createDirectory(destinationDirectory);
+		
+		
+		for(clazz in parser.classes.items)
+		{
+			for(subclass in clazz.classesInSameFile)
+				addEnumNames(subclass.enumerations);
+		
+			addEnumNames(clazz.enumerations);
+		}
+		
+		_enumNames.push("NSLayoutAttribute");
+		_enumNames.push("UILayoutPriority");
+		
 		
 		var cppSavePath:String = "";
 		var hxSavePath:String = "";
@@ -63,6 +81,18 @@ class BasisAppleExporter
 		neko.Lib.println("-----  Export Finished -----");
 	}
 	
+	private function addEnumNames(enums:Array<Enumeration>):Void
+	{
+		for(enumeration in enums)
+		{
+			_enumNames.push(enumeration.name);
+			for(element in enumeration.elements)
+			{
+				_enumNames.push(element.name);
+			}
+		}
+	}
+	
 	private function saveClass(path:String, content:String):Void
 	{
 		var fout:FileOutput = File.write(path , false);
@@ -81,24 +111,25 @@ class BasisAppleExporter
 		_currentHxClassContent += "//This code was generated using ObjcToHaxeExtern\n";
 		_currentHxClassContent += "//https://github.com/Randonee/ObjcToHaxeExtern\n\n";
 		
-		_currentCppClassContent += "//This code was generated using ObjcToHaxeExtern\n";
-		_currentCppClassContent += "//https://github.com/Randonee/ObjcToHaxeExtern\n\n";
-		
 		_currentHxClassContent += "package " + packagePath + ";\n\n";
 		
-		_currentHxClassContent += "import cpp.Lib;";
-		_currentHxClassContent += "import ios.ViewManager;";
-		_currentHxClassContent += "import ios.ViewBase;";
+		_currentHxClassContent += "import cpp.Lib;\n";
+		_currentHxClassContent += "import ios.ViewManager;\n";
+		_currentHxClassContent += "import ios.ViewBase;\n";
+		_currentHxClassContent += "\n";
 		
-		
+		//----- CPP
+		_currentCppClassContent += "//This code was generated using ObjcToHaxeExtern\n";
+		_currentCppClassContent += "//https://github.com/Randonee/ObjcToHaxeExtern\n\n";
 		_currentCppClassContent += "namespace basis\n";
 		_currentCppClassContent += "{\n";
+		//----- 
 		
 		createActuallClass(clazz);
 		
-		
-		
+		//----- CPP
 		_currentCppClassContent += "}";
+		//----- 
 	}
 	
 	private function createActuallClass(clazz:Clazz):Void
@@ -113,7 +144,7 @@ class BasisAppleExporter
 		
 		if(clazz.hasDefinition)
 		{
-			_currentHxClassContent += createClassDefinition(clazz);
+			createClassDefinition(clazz);
 			_currentHxClassContent += "\n{\n";
 			
 			_currentHxClassContent += "\n\t public function new(?type=\"" + clazz.name + "\")\n";
@@ -181,24 +212,29 @@ class BasisAppleExporter
 				}
 			}
 				
-			_currentHxClassContent += "}\n\n";
+			
 		}
 		
+		_currentHxClassContent += "\n\n";
+		
 		for(a in 0...clazz.enumerations.length)
-			createEnum(clazz.enumerations[a]) + "\n\n";
+			createEnum(clazz.enumerations[a]);
 			
+		_currentHxClassContent += "\n\n";
+		
+		/*
 		for(a in 0...clazz.structures.length)
 		{
 			createStructure(clazz.structures[a], clazz);
 			_currentHxClassContent += "\n\n";
 		}
+		*/
+		_currentHxClassContent += "}\n\n";
 	}
 	
 	
 	public function createClassDefinition(clazz:Clazz):Void
 	{
-		var _currentHxClassContent:String = "";
-		
 		_currentHxClassContent += "class " + clazz.name;
 		
 		if(clazz.parentClassName != "")
@@ -225,7 +261,7 @@ class BasisAppleExporter
 		
 		for(a in 0...clazz.protocols.length)
 		{
-			var protocolClass:Clazz = parser.classes.getClassForType(clazz.protocols[a]);
+			var protocolClass:Clazz = parser.classes.getClassForType(clazz.protocols[a], false);
 			if(protocolClass != null && protocolClass.isProtocol)
 				addProtocolMethods(protocolClass);
 		}
@@ -233,7 +269,9 @@ class BasisAppleExporter
 	
 	public function createProperty(property:Property, clazz:Clazz):Void
 	{
-		
+		if(shouldIgnorType(property.type) || property.deprecated || property.name == "tag")
+			return;
+			
 		var propNameUpper:String = property.name.charAt(0).toUpperCase() + property.name.substring(1);
 		var cppGetName:String = clazz.name.toLowerCase() + "_get" + propNameUpper;
 		var cppSetName:String = clazz.name.toLowerCase() + "_set" + propNameUpper;
@@ -249,7 +287,7 @@ class BasisAppleExporter
 		
 		_currentHxClassContent += "\tprivate function get" + propNameUpper + "():" + argType + "\n";
 		_currentHxClassContent += "\t{\n";
-		if(isUIClass(parser.classes.getClassForType(property.type)))
+		if(isUIClass(parser.classes.getClassForType(argType, false)))
 		{
 			_currentHxClassContent += "\t\tvar viewTag:Int = "  + cppGetName + "(_tag);\n";
 			_currentHxClassContent += "\t\treturn cast(ViewManager.getView(viewTag), " + argType +");\n";
@@ -259,7 +297,7 @@ class BasisAppleExporter
 			_currentHxClassContent += "\t\treturn " + cppGetName + "(_tag);\n";
 		}
 		_currentHxClassContent += "\t}\n";
-		_currentHxClassContent += "\tprivate static var " + cppGetName + " = Lib.Load(\"basis\", " + cppGetName + ", 1);\n";
+		_currentHxClassContent += "\tprivate static var " + cppGetName + " = Lib.load(\"basis\", \"" + cppGetName + "\", 1);\n";
 		
 		if(!property.readOnly)
 		{
@@ -268,7 +306,7 @@ class BasisAppleExporter
 			_currentHxClassContent += "\t{\n";
 			
 			
-			if(isUIClass(parser.classes.getClassForType(property.type)))
+			if(isUIClass(parser.classes.getClassForType(argType, false)))
 			{
 				_currentHxClassContent += "\t\t" + cppSetName + "(_tag, value.tag);\n";
 				_currentHxClassContent += "\t\tvar viewTag:Int = " + cppGetName + "(_tag)\n";
@@ -282,7 +320,7 @@ class BasisAppleExporter
 			
 			
 			_currentHxClassContent += "\t}\n";
-			_currentHxClassContent += "\tprivate static var " + cppSetName + " = Lib.Load(\"basis\", " + cppSetName + ", 1);\n";
+			_currentHxClassContent += "\tprivate static var " + cppSetName + " = Lib.load(\"basis\", \"" + cppSetName + "\", 2);\n";
 		}
 		_currentHxClassContent += "\n";
 		
@@ -291,9 +329,9 @@ class BasisAppleExporter
 		_currentCppClassContent += "\tvalue " + cppGetName + "(value tag)\n";
 		_currentCppClassContent += "\t{\n";
 		_currentCppClassContent += "\t\t" + clazz.name + " *view = (" + clazz.name + "*)[[BasisApplication getViewManager] getView:val_int(tag)];\n";
-		if(isUIClass(parser.classes.getClassForType(property.type)))
+		if(isUIClass(parser.classes.getClassForType(argType, false)))
 		{
-			_currentCppClassContent += "\t\t" + property.type + "* viewVar = (" + property.type + "*)view." + property.name + ";\n";
+			_currentCppClassContent += "\t\t" + property.type + " viewVar = (" + property.type + ")view." + property.name + ";\n";
 			_currentCppClassContent += "\t\treturn alloc_int(viewVar.tag);\n";
 		}
 		else
@@ -309,10 +347,10 @@ class BasisAppleExporter
 		{
 			_currentCppClassContent += "\tvoid " + cppSetName + "(value tag, value arg1)\n";
 			_currentCppClassContent += "\t{\n";
-			_currentCppClassContent += "\t\t" + clazz.name + " *view (" + clazz.name + "*)[[BasisApplication getViewManager] getView:val_int(tag)];\n";
-			if(isUIClass(parser.classes.getClassForType(property.type)))
+			_currentCppClassContent += "\t\t" + clazz.name + " *view = (" + clazz.name + "*)[[BasisApplication getViewManager] getView:val_int(tag)];\n";
+			if(isUIClass(parser.classes.getClassForType(argType, false)))
 			{
-				_currentCppClassContent += "\t\t" + property.type + "* viewVar = (" + property.type + "*)[[BasisApplication getViewManager] getView:val_int(arg1)];\n";
+				_currentCppClassContent += "\t\t" + property.type + " viewVar = (" + property.type + ")[[BasisApplication getViewManager] getView:val_int(arg1)];\n";
 				_currentCppClassContent += "\t\t" + "view." + property.name + " = viewVar;\n";
 			}
 			else
@@ -326,8 +364,21 @@ class BasisAppleExporter
 		
 	}
 	
+	public function shouldIgnorType(type:String):Bool
+	{
+		type = StringTools.replace(type, "*", "");
+		for(a in 0...TYPES_TO_IGNORE.length)
+		{
+			if(type == TYPES_TO_IGNORE[a])
+				return true;
+		}
+		
+		return false;
+	}
+	
 	public function getHaxeToCpp(name:String, type:String):String
 	{
+		type = StringTools.replace(type, "*", "");
 		var content:String = "";
 	
 		switch(type)
@@ -345,28 +396,41 @@ class BasisAppleExporter
 				return "arrayToCGAffineTransform(" + name + ")";
 			
 			case "UIColor":
-				return "arrayToCGColor([" + name + " CGColor])";
-			
+				return "[UIColor colorWithCGColor:arrayToCGColor(" + name + ")]";
 			case "int":
-				return "int_val(" + name + ")";
-			
+				return "val_int(" + name + ")";
+				
+			case "NSInteger":
+				return "val_int(" + name + ")";
+				
 			case "float":
-				return "float_val(" + name + ")";
+				return "val_float(" + name + ")";
+				
+			case "CGFloat":
+				return "val_float(" + name + ")";
 			
 			case "BOOL":
-				return "bool_val(" + name + ")";
+				return "val_bool(" + name + ")";
 				
 			case "NSString":
 				return "[NSString stringWithCString:val_string(" + name + ")encoding:NSUTF8StringEncoding]";
 				
+			case "UIEdgeInsets":
+				return "arrayToUIEdgeInsets(" + name + ")";
+		}
+		
+		for(elementName in _enumNames)
+		{
+			if(type == elementName)
+				return "val_int(" + name + ")"; 
 		}
 		
 		return name;
-		
 	}
 	
 	public function getCppToHaxe(name:String, type:String):String
 	{
+		type = StringTools.replace(type, "*", "");
 		var content:String = "";
 	
 		switch(type)
@@ -388,8 +452,14 @@ class BasisAppleExporter
 			
 			case "int":
 				return "alloc_int(" + name + ")";
+				
+			case "NSInteger":
+				return "alloc_int(" + name + ")";
 			
 			case "float":
+				return "alloc_float(" + name + ")";
+				
+			case "CGFloat":
 				return "alloc_float(" + name + ")";
 				
 			case "BOOL":
@@ -398,9 +468,15 @@ class BasisAppleExporter
 			case "NSString":
 				return "alloc_string([" + name + " cStringUsingEncoding:NSUTF8StringEncoding])";
 				
-				
-				
-				
+			case "UIEdgeInsets":
+				return "uiEdgeInsetsToArray(" + name + ")";
+		}
+		
+		
+		for(elementName in _enumNames)
+		{
+			if(type == elementName)
+				return "alloc_int(" + name + ")"; 
 		}
 		
 		return name;
@@ -414,6 +490,9 @@ class BasisAppleExporter
 	
 	public function createMethod(method:Method, clazz:Clazz, ?overloadNum:Int = 0, ?overrides:Bool=false, ?addrequire:Bool=true):Void
 	{
+		if(shouldIgnorType(method.returnType) || method.deprecated)
+			return;
+	
 		if(method.name.indexOf("init") == 0)
 			return;
 			
@@ -435,13 +514,13 @@ class BasisAppleExporter
 		for(a in 0...method.arguments.length)
 		{
 			var argType:String = getHaxeType(method.arguments[a].type);
-			if(argType == "Void")
+			if(shouldIgnorType(argType))
 				return;
 				
 			if(a > 0)
 				content += ", ";
 				
-			if(isUIClass(parser.classes.getClassForType(method.arguments[a].type)))
+			if(isUIClass(parser.classes.getClassForType(method.arguments[a].type, false)))
 				content += " " + method.arguments[a].name + "Tag:Int";
 			else
 				content += " " + method.arguments[a].name + ":" + argType;
@@ -463,13 +542,13 @@ class BasisAppleExporter
 			var argType:String = getHaxeType(method.arguments[a].type);
 			content += ", " + method.arguments[a].name;
 			
-			if(isUIClass(parser.classes.getClassForType(argType)))
-				content += "Tag";
+			if(isUIClass(parser.classes.getClassForType(argType, false)))
+				content += ".tag";
 			
 		}
 		content += ");\n";
 		content += "\t}\n";
-		content += "\tprivate static var " +  cppName + " = Lib.load(\"basis\" \"" + cppName + "\", " + Std.string(method.arguments.length + 1)  +  ");\n";
+		content += "\tprivate static var " +  cppName + " = Lib.load(\"basis\", \"" + cppName + "\", " + Std.string(method.arguments.length + 1)  +  ");\n";
 	
 		_currentHxClassContent += content;
 		
@@ -490,10 +569,10 @@ class BasisAppleExporter
 		
 		_currentCppClassContent += ")\n";
 		_currentCppClassContent += "\t{\n";
-		_currentCppClassContent += "\t\t" + clazz.name + " = *view (" + clazz.name + "*)[[BasisApplication getViewManager] getView:val_int(tag)];\n";
+		_currentCppClassContent += "\t\t" + clazz.name + " *view = (" + clazz.name + "*)[[BasisApplication getViewManager] getView:val_int(tag)];\n";
 		for(a in 0...method.arguments.length)
 		{
-			if(isUIClass(parser.classes.getClassForType(getHaxeType(method.arguments[a].type))))
+			if(isUIClass(parser.classes.getClassForType(getHaxeType(method.arguments[a].type), false)))
 			{
 				_currentCppClassContent += "\t\t" +  method.arguments[a].type + " carg" + Std.string(a+1) + " = " + "(" + method.arguments[a].type + ")[[BasisApplication getViewManager] getView:val_int(arg" + Std.string(a+1) + ")];\n";
 			}
@@ -506,7 +585,7 @@ class BasisAppleExporter
 		if(getHaxeType(method.returnType) != "Void")
 			_currentCppClassContent += method.returnType + " returnVar = ";
 		
-		_currentCppClassContent += "[view " + methodName;
+		_currentCppClassContent += "[view " + method.name;
 		
 		
 		for(a in 0...method.arguments.length)
@@ -517,13 +596,15 @@ class BasisAppleExporter
 		
 		if(getHaxeType(method.returnType) != "Void")
 		{
-			if(isUIClass(parser.classes.getClassForType(getHaxeType(method.returnType))))
+			if(isUIClass(parser.classes.getClassForType(getHaxeType(method.returnType), false)))
 				_currentCppClassContent += "\t\treturn alloc_int(returnVar.tag);\n";
 			else
 				_currentCppClassContent += "\t\treturn " + getCppToHaxe("returnVar", method.returnType) + ";\n";
 		}
 		
-		_currentCppClassContent += "\t}\n\n";
+		_currentCppClassContent += "\t}\n";
+		
+		_currentCppClassContent += "\tDEFINE_PRIM (" + cppName  + ", " + Std.string(method.arguments.length + 1)  + ");\n\n";
 		
 		
 		/*
@@ -551,10 +632,14 @@ class BasisAppleExporter
 		
 		for(a in 0...enumeration.elements.length)
 		{
-			if( enumeration.elements[a].length <= 4)
+			if( enumeration.elements[a].name.length <= 4)
 				return ;
 				
-			_currentHxClassContent += "public static inline var " + enumeration.elements[a] + ":Int = " + a +";\n";
+			_currentHxClassContent += "\tpublic static inline var " + enumeration.elements[a].name + ":Int = ";
+			if(enumeration.elements[a].value == "")
+				 _currentHxClassContent += a +";\n";
+			else
+				_currentHxClassContent += " " + enumeration.elements[a].value +";\n";
 		}
 		
 	}
@@ -598,6 +683,9 @@ class BasisAppleExporter
 	
 	private function isUIClass(clazz:Clazz):Bool
 	{
+		if(clazz == null)
+			return false;
+			
 		return parser.classes.deosClassExtendFromClass(clazz, "UIView");
 	}
 	
@@ -629,6 +717,12 @@ class BasisAppleExporter
 		{
 			type = type.substring(type.indexOf("<") + 1, type.indexOf(">"));
 		}
+		
+		for(elementName in _enumNames)
+		{
+			if(objcType == elementName)
+				return "Int"; 
+		}
 			
 		return type;
 	}
@@ -659,7 +753,6 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSStringCompareOptions", "Int");
 		_typeObjToHaxe.set("float", "Float");
 		_typeObjToHaxe.set("NSTimeInterval", "Float");
-		_typeObjToHaxe.set("UILayoutPriority", "Float");
 		_typeObjToHaxe.set("CGFloat", "Float");
 		_typeObjToHaxe.set("CGFloat*", "Float");
 		_typeObjToHaxe.set("double", "Float");
@@ -682,13 +775,9 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("void", "Void");
 		_typeObjToHaxe.set("onewayvoid", "Void");
 		_typeObjToHaxe.set("void*", "Void");
-		_typeObjToHaxe.set("NSRangePointer", "NSRange");
 		_typeObjToHaxe.set("id", "Dynamic");
 		_typeObjToHaxe.set("id*", "Dynamic");
-		_typeObjToHaxe.set("Class", "Class<Dynamic>");
 		_typeObjToHaxe.set("void*", "Dynamic");
-		_typeObjToHaxe.set("NSArray*", "Array<Dynamic>");
-		_typeObjToHaxe.set("NSArray", "Array<Dynamic>");
 		_typeObjToHaxe.set("IMP", "Dynamic");
 		_typeObjToHaxe.set("Protocol*", "Dynamic");
 		_typeObjToHaxe.set("unsigned", "Dynamic");
@@ -705,9 +794,9 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("CGPoint", "Array<Float>");
 		_typeObjToHaxe.set("CGAffineTransform", "Array<Float>");
 		_typeObjToHaxe.set("UIColor", "Array<Float>");
-		
-		
-		_typeObjToHaxe.set("UIViewAutoresizing", "Int");
+		_typeObjToHaxe.set("UIColor*", "Array<Float>");
+		_typeObjToHaxe.set("UIEdgeInsets", "Array<Float>");
+		_typeObjToHaxe.set("UIEdgeInsets*", "Array<Float>");
 		
 		
 		

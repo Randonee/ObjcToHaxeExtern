@@ -339,10 +339,10 @@ class ExternExporter
 		
 		for(a in 0...enumeration.elements.length)
 		{
-			if( enumeration.elements[a].length <= 4)
+			if( enumeration.elements[a].name.length <= 4)
 				return "";
 				
-			contents += "\n\t" + enumeration.elements[a] + ";";
+			contents += "\n\t" + enumeration.elements[a].name + ";";
 		}
 		
 		contents += "\n}";

@@ -43,7 +43,7 @@ class ClassCollection
 		return false;
 	}
 	
-	public function getClassForType(type:String):Clazz
+	public function getClassForType(type:String, ?includeStructuresAndEnums:Bool = true):Clazz
 	{
 		if(items.exists(type))
 			return items.get(type);
@@ -57,16 +57,19 @@ class ClassCollection
 				
 			}
 			
-			for(b in 0...clazz.structures.length)
+			if(includeStructuresAndEnums)
 			{
-				if(clazz.structures[b].name == type)
-					return clazz;
-			}
-			
-			for(b in 0...clazz.enumerations.length)
-			{
-				if(clazz.enumerations[b].name == type)
-					return clazz;
+				for(b in 0...clazz.structures.length)
+				{
+					if(clazz.structures[b].name == type)
+						return clazz;
+				}
+				
+				for(b in 0...clazz.enumerations.length)
+				{
+					if(clazz.enumerations[b].name == type)
+						return clazz;
+				}
 			}
 		}
 		return null;
