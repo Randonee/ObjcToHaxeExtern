@@ -29,6 +29,23 @@ class ClassCollection
 		return false;
 	}
 	
+	public function isPropertyDefinedInSuperClass(propertyName:String, clazz:Clazz):Bool
+	{
+		var parentClass:Clazz = getClassForType(clazz.parentClassName);
+	
+		if(parentClass != null)
+		{
+			for(property in parentClass.properties)
+			{
+				if(property.name == propertyName)
+					return true;
+			}
+			
+			return isPropertyDefinedInSuperClass(propertyName, parentClass);
+		}
+		return false;
+	}
+	
 	public function doesSuperClassImplementProtocol(protocol:String, clazz:Clazz):Bool
 	{
 		var parentClass:Clazz = getClassForType(clazz.parentClassName);

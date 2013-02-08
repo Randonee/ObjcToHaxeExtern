@@ -9,7 +9,10 @@ import sys.io.FileOutput;
 
 class BasisAppleExporter
 {
-	private static inline var TYPES_TO_IGNORE:Array<String> = ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", "UIGestureRecognizer", "UIEvent", "UIImage", "NSAttributedString"];
+	private static inline var TYPES_TO_IGNORE:Array<String> = ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
+																"UIGestureRecognizer", "UIEvent", "UIImage", "NSAttributedString",
+																"UIFont", "SEL", "id", "NSSet", "UIViewController", "UIScreen",
+																"NSUndoManager"];
 
 	public var parser(default, null):Parser;
 	private var _typesUsed:Hash<Bool>;
@@ -49,6 +52,11 @@ class BasisAppleExporter
 		
 		_enumNames.push("NSLayoutAttribute");
 		_enumNames.push("UILayoutPriority");
+		_enumNames.push("NSTextAlignment");
+		_enumNames.push("NSWritingDirection");
+		_enumNames.push("NSTextTabType");
+		_enumNames.push("NSLineBreakMode");
+		_enumNames.push("UIBaselineAdjustment");
 		
 		
 		var cppSavePath:String = "";
@@ -116,6 +124,11 @@ class BasisAppleExporter
 		_currentHxClassContent += "import cpp.Lib;\n";
 		_currentHxClassContent += "import ios.ViewManager;\n";
 		_currentHxClassContent += "import ios.ViewBase;\n";
+		_currentHxClassContent += "import appkit.NSText;\n";
+		_currentHxClassContent += "import appkit.NSParagraphStyle;\n";
+		_currentHxClassContent += "import ios.ui.UIkit;\n";
+		
+		
 		_currentHxClassContent += "\n";
 		
 		//----- CPP
@@ -141,78 +154,80 @@ class BasisAppleExporter
 		if(clazz.name == "NSMutableArray")
 		 return;
 	
-		
 		if(clazz.hasDefinition)
 		{
+			
 			createClassDefinition(clazz);
 			_currentHxClassContent += "\n{\n";
 			
-			_currentHxClassContent += "\n\t public function new(?type=\"" + clazz.name + "\")\n";
-			_currentHxClassContent += "\t{\n";
-			_currentHxClassContent += "\t\tsuper(type);\n";
-			_currentHxClassContent += "\t}\n";
-			
-			_currentHxClassContent += "\n\t//Constants\n";
-			for(a in 0...clazz.constants.length)
+			if(isUIClass(clazz))
 			{
-				_currentHxClassContent += "\t";
-				createConstant(clazz.constants[a]);
-				_currentHxClassContent += "\n";
-			}
 			
-			
-			/*
-			_currentHxClassContent += "\n\t//Static Methods\n";
-			for(methods in clazz.staticMethods)
-			{
-				for(a in 0...methods.length)
+				_currentHxClassContent += "\n\t public function new(?type=\"" + clazz.name + "\")\n";
+				_currentHxClassContent += "\t{\n";
+				_currentHxClassContent += "\t\tsuper(type);\n";
+				_currentHxClassContent += "\t}\n";
+				
+				_currentHxClassContent += "\n\t//Constants\n";
+				for(a in 0...clazz.constants.length)
 				{
-					if(!clazz.isMethodDefined(methods[a].name))
+					_currentHxClassContent += "\t";
+					createConstant(clazz.constants[a]);
+					_currentHxClassContent += "\n";
+				}
+				
+				
+				/*
+				_currentHxClassContent += "\n\t//Static Methods\n";
+				for(methods in clazz.staticMethods)
+				{
+					for(a in 0...methods.length)
 					{
-						if(a > 0)
-							_currentHxClassContent += "\t" + createOverrloadMeta(methods[a], clazz) + "\n"; 
+						if(!clazz.isMethodDefined(methods[a].name))
+						{
+							if(a > 0)
+								_currentHxClassContent += "\t" + createOverrloadMeta(methods[a], clazz) + "\n"; 
+						
+							_currentHxClassContent += "\t" + createStaticMethod(methods[a], a, parser.classes.isStaticMothodDefinedInSuperClass(methods[a].name, clazz)) + "\n";
+						}
+					}
+				}*/
+			
+			
+				_currentHxClassContent += "\n\t//Properties\n";
+				for(a in 0...clazz.properties.length)
+				{
+					createProperty(clazz.properties[a], clazz) + "\n";
+				}
 					
-						_currentHxClassContent += "\t" + createStaticMethod(methods[a], a, parser.classes.isStaticMothodDefinedInSuperClass(methods[a].name, clazz)) + "\n";
-					}
-				}
-			}*/
-			
-			
-			_currentHxClassContent += "\n\t//Properties\n";
-			for(a in 0...clazz.properties.length)
-			{
-				createProperty(clazz.properties[a], clazz) + "\n";
-			}
-				
-			_currentHxClassContent += "\n\t//Methods\n";
-			for(methods in clazz.methods)
-			{
-				for(a in 0...methods.length)
+				_currentHxClassContent += "\n\t//Methods\n";
+				for(methods in clazz.methods)
 				{
-					createMethod(methods[a], clazz, a, parser.classes.isMothodDefinedInSuperClass(methods[a].name, clazz)) + "\n";
-				}
-			}
-			
-			if(_protocolMethods.length > 0 &&  !clazz.isProtocol)
-			{
-				_currentHxClassContent += "\n\n\t//Protocol Methods\n";
-				for(a in 0..._protocolMethods.length)
-				{
-					if(!clazz.isMethodDefined(_protocolMethods[a].name) && !parser.classes.isMothodDefinedInSuperClass(_protocolMethods[a].name, clazz) && !_methodsWritten.exists(_protocolMethods[a].name))
+					for(a in 0...methods.length)
 					{
-						createMethod(_protocolMethods[a], clazz, 0, false) + "\n";
+						createMethod(methods[a], clazz, a, parser.classes.isMothodDefinedInSuperClass(methods[a].name, clazz)) + "\n";
 					}
 				}
 				
-				
-				_currentHxClassContent += "\n\n\t//Protocol Properties\n";
-				for(a in 0..._protocolProperties.length)
+				if(_protocolMethods.length > 0 &&  !clazz.isProtocol)
 				{
-					createProperty(_protocolProperties[a], clazz) + "\n";
+					_currentHxClassContent += "\n\n\t//Protocol Methods\n";
+					for(a in 0..._protocolMethods.length)
+					{
+						if(!clazz.isMethodDefined(_protocolMethods[a].name) && !parser.classes.isMothodDefinedInSuperClass(_protocolMethods[a].name, clazz) && !_methodsWritten.exists(_protocolMethods[a].name))
+						{
+							createMethod(_protocolMethods[a], clazz, 0, false) + "\n";
+						}
+					}
+					
+					
+					_currentHxClassContent += "\n\n\t//Protocol Properties\n";
+					for(a in 0..._protocolProperties.length)
+					{
+						createProperty(_protocolProperties[a], clazz) + "\n";
+					}
 				}
 			}
-				
-			
 		}
 		
 		_currentHxClassContent += "\n\n";
@@ -237,10 +252,13 @@ class BasisAppleExporter
 	{
 		_currentHxClassContent += "class " + clazz.name;
 		
-		if(clazz.parentClassName != "")
+		if(clazz.parentClassName != "" && (isUIClass(clazz) || clazz.name == "UIResponder") )
 		{
-			_currentHxClassContent += " extends " + clazz.parentClassName;
-			addTypeUsed(clazz.parentClassName);
+			_currentHxClassContent += " extends ";
+			if(clazz.name == "UIResponder")
+				_currentHxClassContent += "ViewBase";
+			else
+				_currentHxClassContent +=  clazz.parentClassName;
 		}
 	}
 	
@@ -269,7 +287,7 @@ class BasisAppleExporter
 	
 	public function createProperty(property:Property, clazz:Clazz):Void
 	{
-		if(shouldIgnorType(property.type) || property.deprecated || property.name == "tag")
+		if(shouldIgnorType(property.type) || property.deprecated || property.name == "tag" || parser.classes.isPropertyDefinedInSuperClass(property.name, clazz))
 			return;
 			
 		var propNameUpper:String = property.name.charAt(0).toUpperCase() + property.name.substring(1);
@@ -408,6 +426,12 @@ class BasisAppleExporter
 				
 			case "CGFloat":
 				return "val_float(" + name + ")";
+				
+			case "UIWindowLevel":
+				return "val_float(" + name + ")";
+				
+			case "NSTimeInterval":
+				return "val_float(" + name + ")";
 			
 			case "BOOL":
 				return "val_bool(" + name + ")";
@@ -459,7 +483,13 @@ class BasisAppleExporter
 			case "float":
 				return "alloc_float(" + name + ")";
 				
+			case "UIWindowLevel":
+				return "alloc_float(" + name + ")";
+				
 			case "CGFloat":
+				return "alloc_float(" + name + ")";
+			
+			case "NSTimeInterval":
 				return "alloc_float(" + name + ")";
 				
 			case "BOOL":
@@ -490,7 +520,7 @@ class BasisAppleExporter
 	
 	public function createMethod(method:Method, clazz:Clazz, ?overloadNum:Int = 0, ?overrides:Bool=false, ?addrequire:Bool=true):Void
 	{
-		if(shouldIgnorType(method.returnType) || method.deprecated)
+		if(shouldIgnorType(method.returnType) || method.deprecated || parser.classes.isMothodDefinedInSuperClass(method.name, clazz))
 			return;
 	
 		if(method.name.indexOf("init") == 0)
@@ -760,6 +790,7 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("CFTimeInterval*", "Float");
 		_typeObjToHaxe.set("unsignedlong", "Float");
 		_typeObjToHaxe.set("unsignedlong*", "Float");
+		_typeObjToHaxe.set("UIWindowLevel", "Float");
 		_typeObjToHaxe.set("bool", "Bool");
 		_typeObjToHaxe.set("BOOL", "Bool");
 		_typeObjToHaxe.set("NSString*", "String");
@@ -797,7 +828,6 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("UIColor*", "Array<Float>");
 		_typeObjToHaxe.set("UIEdgeInsets", "Array<Float>");
 		_typeObjToHaxe.set("UIEdgeInsets*", "Array<Float>");
-		
 		
 		
 		_typeObjToHaxe.set("NSZone", "Dynamic");
