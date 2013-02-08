@@ -178,8 +178,8 @@ class Lexer
 	
 	public function removeNSAvailables(str:String):String
 	{
-		var eReg:EReg = ~/\bNS_CLASS_AVAILABLE_IOS\b\(.*\)/g;
-		str = eReg.replace(str, "");
+	//	var eReg:EReg = ~/\bNS_CLASS_AVAILABLE_IOS\b\(.*\)/g;
+		//str = eReg.replace(str, "");
 		
 		return str;
 	}

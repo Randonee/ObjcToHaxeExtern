@@ -21,6 +21,8 @@ class ExternExporter
 	{
 		this.parser = parser;
 		createTypeConversionHash();
+		_typesUsed = new Hash<Bool>();
+		_methodsWritten = new Hash<Bool>();
 	}
 	
 	public function export(destinationDirectory:String):Void
@@ -320,10 +322,8 @@ class ExternExporter
 				contents += ", ";
 			contents += " " + method.arguments[a].name + ":" + argType;
 		}
-		
 		addTypeUsed(method.returnType);
 		contents += "):" + getHaxeType(method.returnType) + ";";
-		
 		_methodsWritten.set(method.name, true);
 		
 		return contents;
@@ -422,6 +422,7 @@ class ExternExporter
 	
 	private function addTypeUsed(type:String):Void
 	{
+	
 		type = getHaxeType(type);
 		if(type != "Void" && !_typesUsed.exists(type))
 		{

@@ -1,7 +1,5 @@
 package test.org.objctohaxeextern;
 
-import uikit.UIView;
-
 class TestMain
 {
     static function main()
@@ -12,7 +10,5 @@ class TestMain
         r.add(new ExternExporterTester());
         r.add(new ClassCollectionTester());
         r.run();
-        
-        new UIView();
     }
 }

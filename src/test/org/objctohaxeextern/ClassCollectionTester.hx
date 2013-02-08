@@ -12,7 +12,7 @@ class ClassCollectionTester extends haxe.unit.TestCase
     	{
     		var clazz:Clazz = new Clazz();
     		clazz.name = "Class" + a;
-    		clazz.addMethod({name:"foo" + a, arguments:new Array<Argument>(), returnType:"int"});
+    		clazz.addMethod({name:"foo" + a, arguments:new Array<Argument>(), returnType:"int", deprecated:false, sdk:""});
     		
     		if(a > 1)
     			clazz.parentClassName = "Class" + Std.string(a - 1);

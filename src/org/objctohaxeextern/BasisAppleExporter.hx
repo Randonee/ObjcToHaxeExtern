@@ -9,7 +9,7 @@ import sys.io.FileOutput;
 
 class BasisAppleExporter
 {
-	private static inline var TYPES_TO_IGNORE:Array<String> = ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", "UIGestureRecognizer", "UIEvent"];
+	private static inline var TYPES_TO_IGNORE:Array<String> = ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", "UIGestureRecognizer", "UIEvent", "UIImage", "NSAttributedString"];
 
 	public var parser(default, null):Parser;
 	private var _typesUsed:Hash<Bool>;

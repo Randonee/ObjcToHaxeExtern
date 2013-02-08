@@ -69,24 +69,29 @@ class Parser
 				{	
 					if(tokens.length > 0)
 					{
-						if(isClass(tokens) && tokens[2] == mainClazz.name)
+						if(isClass(tokens))
 						{
-							currentClazz = mainClazz;
-							currentClazz.hasDefinition = true;
-							parseLine(tokens, currentClazz);
-							currentClazz.isProtocol = (tokens[1] == "protocol");
-						}
-						else if(isClass(tokens))
-						{
-							currentClazz = mainClazz.getClassesInSameFile(tokens[2]);
-							if(currentClazz == null)
-							{
-								currentClazz = new Clazz();
-								currentClazz.hasDefinition = true;
-								mainClazz.classesInSameFile.push(currentClazz);
-							}
-							parseLine(tokens, currentClazz);
+							tokens = cleanClassDeff(tokens);
 							
+							if(tokens[2] == mainClazz.name)
+							{	
+								currentClazz = mainClazz;
+								currentClazz.hasDefinition = true;
+								parseLine(tokens, currentClazz);
+								currentClazz.isProtocol = (tokens[1] == "protocol");
+							}
+							else
+							{
+								currentClazz = mainClazz.getClassesInSameFile(tokens[2]);
+								if(currentClazz == null)
+								{
+									currentClazz = new Clazz();
+									currentClazz.hasDefinition = true;
+									mainClazz.classesInSameFile.push(currentClazz);
+								}
+								parseLine(tokens, currentClazz);
+								
+							}
 						}
 						else if(tokens[0] != "FOUNDATION_EXPORT")
 						{
@@ -111,10 +116,21 @@ class Parser
 	
 	public function isClass(tokens:Array<String>):Bool
 	{
-		if(tokens[0] == "@" && (tokens[1] == "interface" || tokens[1] == "protocol"))
+		var index:Int = 0;
+		while(index < tokens.length && tokens[index] != "@")
+			++index;
+		
+		if(tokens[index] == "@" && (tokens[index+1] == "interface" || tokens[index+1] == "protocol"))
 			return true;
 			
 		return false;
+	}
+	
+	public function cleanClassDeff(tokens:Array<String>):Array<String>
+	{
+		while(tokens.length > 0 && tokens[0] != "@")
+			tokens.shift();
+		return tokens;
 	}
 	
 	public function parseLine(tokens:Array<String>, clazz:Clazz):Void
@@ -127,7 +143,10 @@ class Parser
 		else if(tokens[0] == "@" && tokens[1] == "property")
 			parseProperty(tokens, clazz);
 		else if(isClass(tokens))
+		{
+			tokens = cleanClassDeff(tokens);
 			parseClassDefinition(tokens, clazz);
+		}
 		else if( tokens[0] == "enum" )
 			parseEnum(tokens, clazz);
 		else if( tokens[0] == "const" || tokens[1] == "const" )
@@ -249,37 +268,38 @@ class Parser
 		
 		var property:Property = {name:"", readOnly:false, sdk:"", type:"", deprecated:isDeprecated(tokens.join(""))};
 		
+		var index:Int = 0;
+		while(tokens[index] != "property" && index < tokens.length)
+			++index;
+			
+		++index;
 		
-		if(isOnlyAvaialbleInSDK(tokens[tokens.length - 4]))
+		if(tokens[index] == "(")
 		{
-			property.sdk = "ios_" + tokens[tokens.length-2];
-			tokens = tokens.slice(0, tokens.length - 4);
+			while(tokens[index] != ")")
+			{
+				if(tokens[index] == "readonly")
+					property.readOnly = true;
+			 	++index;
+			}
 		}
 		
-		var a:Int = 0;
-		while(a < tokens.length && !property.readOnly)
+		++index;
+		property.type = tokens[index];
+		++index;
+		while(tokens[index] == "*")
 		{
-			property.readOnly = (tokens[a] == "readonly");
-			++a;
+			property.type += "*";
+			++index;
 		}
+				
+		property.name = tokens[index];
+		++index;
 		
 		
-		if(tokens[tokens.length-2] == "=")
-		{
-			property.name = tokens[tokens.length-3];
-			if(tokens[tokens.length-4] == "*")
-				property.type = tokens[tokens.length-5] + "*";
-			else
-				property.type = tokens[tokens.length-4];
-		}
-		else
-		{
-			property.name = tokens[tokens.length-1];
-			if(tokens[tokens.length-2] == "*")
-				property.type = tokens[tokens.length-3] + "*";
-			else
-				property.type = tokens[tokens.length-2];
-		}
+		if(index < tokens.length && isOnlyAvaialbleInSDK(tokens[index]))
+			property.sdk = "ios_" + tokens[index+2];
+		
 		
 		clazz.properties.push(property);
 	}

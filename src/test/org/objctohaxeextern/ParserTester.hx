@@ -102,6 +102,15 @@ class ParserTester extends haxe.unit.TestCase
     	assertEquals("protocol2", clazz.protocols[1]);
     }
     
+    public function testIsClass():Void
+    {
+    	var clazz:Clazz = new Clazz();
+    	var tokens:Array<String> = ["NS_CLASS_AVAILABLE_IOS", "@", "interface", "SomeClass", ":", "ParentClass", "<", "protocol1", ",", "protocol2", ">", ";"];
+    	
+    	var parser:Parser = new Parser();
+    	assertTrue(parser.isClass(tokens));
+    }
+    
     
     public function testEnumeration()
     {
@@ -114,9 +123,9 @@ class ParserTester extends haxe.unit.TestCase
     	
     	assertEquals("SomeEnum", clazz.enumerations[0].name);
     	assertEquals(3, clazz.enumerations[0].elements.length);
-    	assertEquals("val1", clazz.enumerations[0].elements[0]);
-    	assertEquals("val2", clazz.enumerations[0].elements[1]);
-    	assertEquals("val3", clazz.enumerations[0].elements[2]);
+    	assertEquals("val1", clazz.enumerations[0].elements[0].name);
+    	assertEquals("val2", clazz.enumerations[0].elements[1].name);
+    	assertEquals("val3", clazz.enumerations[0].elements[2].name);
     	
     	
     	
@@ -128,9 +137,9 @@ class ParserTester extends haxe.unit.TestCase
     	
     	assertEquals("SomeEnum", clazz.enumerations[0].name);
     	assertEquals(3, clazz.enumerations[0].elements.length);
-    	assertEquals("val1", clazz.enumerations[0].elements[0]);
-    	assertEquals("val2", clazz.enumerations[0].elements[1]);
-    	assertEquals("val3", clazz.enumerations[0].elements[2]);
+    	assertEquals("val1", clazz.enumerations[0].elements[0].name);
+    	assertEquals("val2", clazz.enumerations[0].elements[1].name);
+    	assertEquals("val3", clazz.enumerations[0].elements[2].name);
     	
     	
     	clazz = new Clazz();
@@ -141,9 +150,9 @@ class ParserTester extends haxe.unit.TestCase
     	
     	assertEquals("SomeEnum", clazz.enumerations[0].name);
     	assertEquals(3, clazz.enumerations[0].elements.length);
-    	assertEquals("val1", clazz.enumerations[0].elements[0]);
-    	assertEquals("val2", clazz.enumerations[0].elements[1]);
-    	assertEquals("val3", clazz.enumerations[0].elements[2]);
+    	assertEquals("val1", clazz.enumerations[0].elements[0].name);
+    	assertEquals("val2", clazz.enumerations[0].elements[1].name);
+    	assertEquals("val3", clazz.enumerations[0].elements[2].name);
     }
     
 }
