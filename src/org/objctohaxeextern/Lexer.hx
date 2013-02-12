@@ -2,7 +2,7 @@ package org.objctohaxeextern;
 
 class Lexer
 {
-	private static inline var opperators:Array<String> = [" ", "*", "(", ")", "/" , "-", "+", "@", "<", ">", '"', "'", "=" ,",", "^", ":", ";", "\n", "\t", "\r"];
+	private static inline var opperators:Array<String> = [" ", "{", "}", "*", "(", ")", "/" , "-", "+", "@", "<", ">", '"', "'", "=" ,",", "^", ":", ";", "\n", "\t", "\r"];
 	public var instructionSpansToNextLine(default, null):Bool;
 	
 	private var _inBlockComment:Bool;
@@ -63,7 +63,7 @@ class Lexer
 					if(charIs(text, "/", a+1))
 					{
 						//the rest of the line is a comment
-						return tokens;
+						text = text.substring(0, a);
 					}
 					else if(charIs(text, "*", a+1))
 					{
@@ -113,12 +113,8 @@ class Lexer
 		{
 			//typedef NS_ENUM(NSInteger, UIViewContentMode) {
 		
-			if(tokens[0] != "enum")
-			{
-				tokens = tokens.slice(5);
-				tokens[1] = tokens[0];
-				tokens[0] = "enum";
-			}
+		
+			tokens[0] = "enum";
 			
 			if(!containsChar(text, "}", 0))
 				instructionSpansToNextLine = true;
@@ -130,7 +126,7 @@ class Lexer
 		}
 		else if(instructionSpansToNextLine && containsChar(text, "}", 0))
 			instructionSpansToNextLine = false;
-			
+		
 		return tokens;
 	}
 

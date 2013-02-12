@@ -221,7 +221,7 @@ class Parser
 		++index;
 		while(index < tokens.length)
 		{
-			if(tokens[index] == "(")
+			if(tokens[index] == "(" && tokens[index-1].indexOf("AVAILABLE_IOS") < 0)
 			{
 				var arg:Argument = {type:"", name:"", descriptor:""};
 				
@@ -311,6 +311,9 @@ class Parser
 		
 		while(index < tokens.length && tokens[index] != "{")
 			++index;
+			
+		if(tokens[index-1] == ")")
+			enumeration.name = tokens[index-2];
 			
 		++index;
 		var element:EnumerationElement = {name:"", value:""};

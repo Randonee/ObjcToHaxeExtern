@@ -12,10 +12,9 @@ class LexerTester extends haxe.unit.TestCase
     	var lexer:Lexer = new Lexer();
     	var tokens:Array<String> = lexer.createTokens(objc);
     	
-    	assertEquals(15, tokens.length);
+    	assertEquals(20, tokens.length);
     	
     	assertEquals("enum", tokens[0]);
-    	assertEquals("UIViewContentMode", tokens[1]);
     	
     }
     
@@ -40,10 +39,9 @@ class LexerTester extends haxe.unit.TestCase
     		++index;
     	}
     	
-    	assertEquals(15, tokens.length);
+    	assertEquals(20, tokens.length);
     	
     	assertEquals("enum", tokens[0]);
-    	assertEquals("UIViewContentMode", tokens[1]);
     }
     
     public function testEnumComentsAndValues():Void
@@ -67,7 +65,7 @@ class LexerTester extends haxe.unit.TestCase
     		++index;
     	}
     	
-    	assertEquals(25, tokens.length);
+    	assertEquals(30, tokens.length);
     }
     
     public function testNSAvailableWithMethod():Void
@@ -80,12 +78,19 @@ class LexerTester extends haxe.unit.TestCase
     	assertEquals(11, tokens.length);
     }
     
- /*   public function testRemoveNSAvailables():Void
+    public function testEndSpanNewLine():Void
     {
     	var lexer:Lexer = new Lexer();
-    	assertEquals(" @interface", lexer.removeNSAvailables("NS_CLASS_AVAILABLE_IOS(2_0) @interface"));
-    	assertEquals(" @interface", lexer.removeNSAvailables("NS_AVAILABLE_IOS(2_asdf0) @interface"));
-    }*/
+    	
+    	var enum1:String = "typedef NS_ENUM(NSInteger, UITableViewCellStyle) {\n";
+    	var enum2:String = "};             // available in iPhone OS 3.0\n";
+    	
+    	lexer.createTokens(enum1);
+    	assertTrue(lexer.instructionSpansToNextLine);
+    	lexer.createTokens(enum2);
+    	assertFalse(lexer.instructionSpansToNextLine);
+    	
+    }
     
     public function testBlockCommentRemoval():Void
     {

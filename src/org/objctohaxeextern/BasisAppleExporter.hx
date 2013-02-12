@@ -12,7 +12,8 @@ class BasisAppleExporter
 	private static inline var TYPES_TO_IGNORE:Array<String> = ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
 																"UIGestureRecognizer", "UIEvent", "UIImage", "NSAttributedString",
 																"UIFont", "SEL", "id", "NSSet", "UIViewController", "UIScreen",
-																"NSUndoManager"];
+																"NSUndoManager", "NSDictionary", "UINavigationItem", "UIPanGestureRecognizer",
+																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib"];
 
 	public var parser(default, null):Parser;
 	private var _typesUsed:Hash<Bool>;
@@ -57,6 +58,10 @@ class BasisAppleExporter
 		_enumNames.push("NSTextTabType");
 		_enumNames.push("NSLineBreakMode");
 		_enumNames.push("UIBaselineAdjustment");
+		_enumNames.push("UIBarStyle");
+		_enumNames.push("UIDataDetectorTypes");
+		_enumNames.push("UIBarMetrics");
+		
 		
 		
 		var cppSavePath:String = "";
@@ -326,8 +331,11 @@ class BasisAppleExporter
 			
 			if(isUIClass(parser.classes.getClassForType(argType, false)))
 			{
-				_currentHxClassContent += "\t\t" + cppSetName + "(_tag, value.tag);\n";
-				_currentHxClassContent += "\t\tvar viewTag:Int = " + cppGetName + "(_tag)\n";
+				_currentHxClassContent += "\t\tvar setTag:Int = -1;\n";
+				_currentHxClassContent += "\t\tif(value != null){setTag = value.tag;}\n";
+				_currentHxClassContent += "\t\t" + cppSetName + "(_tag, setTag);\n";
+				_currentHxClassContent += "\t\tvar viewTag:Int = " + cppGetName + "(_tag);\n";
+				_currentHxClassContent += "\t\tif(viewTag <= 0){return null;}\n";
 				_currentHxClassContent += "\t\treturn cast(ViewManager.getView(viewTag), " + argType +");\n";
 			}
 			else
@@ -437,10 +445,24 @@ class BasisAppleExporter
 				return "val_bool(" + name + ")";
 				
 			case "NSString":
-				return "[NSString stringWithCString:val_string(" + name + ")encoding:NSUTF8StringEncoding]";
+				return "[NSString stringWithCString:val_string(" + name + ") encoding:NSUTF8StringEncoding]";
 				
 			case "UIEdgeInsets":
 				return "arrayToUIEdgeInsets(" + name + ")";
+				
+			case "NSURL":
+				return "stringToNSURL(" + name + ")";
+				
+			case "NSURLRequest":
+				return "stringToNSURLRequest(" + name + ")";
+				
+			case "NSIndexPath":
+				return "arrayToNSIndexPath(" + name + ")";
+				
+			case "NSIndexSet":
+				return "arrayToNSIndexSet(" + name + ")";
+				
+			
 		}
 		
 		for(elementName in _enumNames)
@@ -500,6 +522,20 @@ class BasisAppleExporter
 				
 			case "UIEdgeInsets":
 				return "uiEdgeInsetsToArray(" + name + ")";
+				
+			case "NSURL":
+				return "nsUrlToString(" + name + ")";
+				
+			case "NSURLRequest":
+				return "nsUrlRequestToString(" + name + ")";
+				
+			case "NSIndexPath":
+				return "nsIndexPathToArray(" + name + ")";
+			
+			case "NSIndexSet":
+				return "nsIndexSetToArray(" + name + ")";
+				
+			
 		}
 		
 		
@@ -828,6 +864,14 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("UIColor*", "Array<Float>");
 		_typeObjToHaxe.set("UIEdgeInsets", "Array<Float>");
 		_typeObjToHaxe.set("UIEdgeInsets*", "Array<Float>");
+		_typeObjToHaxe.set("NSURL*", "String");
+		_typeObjToHaxe.set("NSURL", "String");
+		_typeObjToHaxe.set("NSURLRequest", "String");
+		_typeObjToHaxe.set("NSURLRequest*", "String");
+		_typeObjToHaxe.set("NSIndexPath*", "Array<Int>");
+		_typeObjToHaxe.set("NSIndexPath", "Array<Int>");
+		_typeObjToHaxe.set("NSIndexSet*", "Array<Int>");
+		_typeObjToHaxe.set("NSIndexSet", "Array<Int>");
 		
 		
 		_typeObjToHaxe.set("NSZone", "Dynamic");
