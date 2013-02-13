@@ -13,7 +13,9 @@ class BasisAppleExporter
 																"UIGestureRecognizer", "UIEvent", "UIImage", "NSAttributedString",
 																"UIFont", "SEL", "id", "NSSet", "UIViewController", "UIScreen",
 																"NSUndoManager", "NSDictionary", "UINavigationItem", "UIPanGestureRecognizer",
-																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib"];
+																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib",
+																"UICollectionViewLayout", "UIBarButtonItem", "UICollectionViewLayoutAttributes",
+																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem"];
 
 	public var parser(default, null):Parser;
 	private var _typesUsed:Hash<Bool>;
@@ -61,8 +63,18 @@ class BasisAppleExporter
 		_enumNames.push("UIBarStyle");
 		_enumNames.push("UIDataDetectorTypes");
 		_enumNames.push("UIBarMetrics");
+		_enumNames.push("UIPopoverArrowDirection");
+		_enumNames.push("UITextAutocapitalizationType");
+		_enumNames.push("UITextAutocorrectionType");
+		_enumNames.push("UITextSpellCheckingType");
+		_enumNames.push("UIKeyboardType");
 		
 		
+		
+		
+		
+		
+		var cppIncludes:String = "";
 		
 		var cppSavePath:String = "";
 		var hxSavePath:String = "";
@@ -74,7 +86,9 @@ class BasisAppleExporter
 			{
 				neko.Lib.println("Export " + clazz.name);
 				
-				cppSavePath = destinationDirectory + "/cpp/" + clazz.savePath + "/" + clazz.name + ".mm";
+				cppSavePath = destinationDirectory + "/cpp/" + clazz.savePath + "/" + clazz.name + "CFFI.mm";
+				cppIncludes += "#include \"" + clazz.savePath.substring(1) + "/" + clazz.name + "CFFI.mm\"\n";
+				
 				hxSavePath = destinationDirectory + "/hx/" + clazz.savePath + "/" + clazz.name + ".hx";
 				Util.createDirectory(destinationDirectory + "/cpp/" + clazz.savePath + "/");
 				Util.createDirectory(destinationDirectory + "/hx/" + clazz.savePath + "/");
@@ -90,6 +104,8 @@ class BasisAppleExporter
 				}
 			}
 		}
+		
+		saveClass(destinationDirectory + "/cpp/GeneratedIncludes.mm", cppIncludes);
 		
 		neko.Lib.println("-----  Export Finished -----");
 	}
@@ -127,11 +143,11 @@ class BasisAppleExporter
 		_currentHxClassContent += "package " + packagePath + ";\n\n";
 		
 		_currentHxClassContent += "import cpp.Lib;\n";
-		_currentHxClassContent += "import ios.ViewManager;\n";
-		_currentHxClassContent += "import ios.ViewBase;\n";
-		_currentHxClassContent += "import appkit.NSText;\n";
-		_currentHxClassContent += "import appkit.NSParagraphStyle;\n";
-		_currentHxClassContent += "import ios.ui.UIkit;\n";
+		_currentHxClassContent += "import basis.ios.ViewManager;\n";
+		_currentHxClassContent += "import basis.ios.ViewBase;\n";
+		_currentHxClassContent += "import apple.appkit.NSText;\n";
+		_currentHxClassContent += "import apple.appkit.NSParagraphStyle;\n";
+		_currentHxClassContent += "import apple.ui.UIkit;\n";
 		
 		
 		_currentHxClassContent += "\n";
@@ -429,7 +445,13 @@ class BasisAppleExporter
 			case "NSInteger":
 				return "val_int(" + name + ")";
 				
+			case "NSUInteger":
+				return "val_int(" + name + ")";
+				
 			case "float":
+				return "val_float(" + name + ")";
+				
+			case "double":
 				return "val_float(" + name + ")";
 				
 			case "CGFloat":
@@ -461,6 +483,12 @@ class BasisAppleExporter
 				
 			case "NSIndexSet":
 				return "arrayToNSIndexSet(" + name + ")";
+				
+			case "NSRange":
+				return "arrayToNSRange(" + name + ")";
+				
+			case "UIOffset":
+				return "arrayToUIOffset(" + name + ")";
 				
 			
 		}
@@ -501,8 +529,14 @@ class BasisAppleExporter
 				
 			case "NSInteger":
 				return "alloc_int(" + name + ")";
+				
+			case "NSUInteger":
+				return "alloc_int(" + name + ")";
 			
 			case "float":
+				return "alloc_float(" + name + ")";
+				
+			case "double":
 				return "alloc_float(" + name + ")";
 				
 			case "UIWindowLevel":
@@ -535,6 +569,11 @@ class BasisAppleExporter
 			case "NSIndexSet":
 				return "nsIndexSetToArray(" + name + ")";
 				
+			case "NSRange":
+				return "nsRangeToArray(" + name + ")";
+				
+			case "UIOffset":
+				return "uiOffsetToArray(" + name + ")";
 			
 		}
 		
@@ -838,7 +877,6 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("char*", "String");
 		_typeObjToHaxe.set("UTF32Char", "String");
 		_typeObjToHaxe.set("NSNumber*", "Float");
-		_typeObjToHaxe.set("NSDate*", "Date");
 		_typeObjToHaxe.set("void", "Void");
 		_typeObjToHaxe.set("onewayvoid", "Void");
 		_typeObjToHaxe.set("void*", "Void");
@@ -872,6 +910,8 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSIndexPath", "Array<Int>");
 		_typeObjToHaxe.set("NSIndexSet*", "Array<Int>");
 		_typeObjToHaxe.set("NSIndexSet", "Array<Int>");
+		_typeObjToHaxe.set("UIOffset", "Array<Int>");
+		_typeObjToHaxe.set("NSRange", "Array<Int>");
 		
 		
 		_typeObjToHaxe.set("NSZone", "Dynamic");

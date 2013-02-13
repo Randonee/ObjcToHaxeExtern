@@ -200,6 +200,12 @@ class Parser
 	public function parseMethod(tokens:Array<String>, clazz:Clazz):Void
 	{
 		//token structure:[ "-", "(", "retyrnType", ")", "name", ":", "(", "arg1ype", ")", "name", ":", "(", "arg2type", ")"  ]
+		
+		if(tokens.join("").indexOf("^") >= 0)
+		{
+			neko.Lib.println("-- method skipped: " + tokens.join(" "));
+			return;
+		}
 	
 		var method:Method = {name:"", arguments:new Array<Argument>(), sdk:"", returnType:"", deprecated:isDeprecated(tokens.join(""))};
 		var isStatic:Bool = (tokens[0] == "+");
@@ -234,7 +240,7 @@ class Parser
 				index += argTokens.length + 2;
 				arg.name = tokens[index];
 				
-				if(arg.name == null || arg.type.indexOf(",") >= 0 )
+				if(arg.name == null || arg.type.indexOf(",") >= 0)
 				{
 					neko.Lib.println("-- method skipped: " + method.name);
 					return;
