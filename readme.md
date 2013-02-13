@@ -12,4 +12,4 @@ Info
 
 * Parses source directory and sub directories for files ending in ".h"
 * Package path for classes is based on source directory structure. Example: source/com/somename/SomeHeader.h would become com.somename.SomeHeader.hx
-* You can find ios header files at: /Applications/xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks
+* Use the ant task copyheaders to copy UIKit headers. You may need to modify the path depending on the iPhone SDK version installed

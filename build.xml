@@ -6,7 +6,6 @@
 		</exec>
 	</target>
 	
-	
 	<target name="run">
 		<exec dir="." failonerror="true" executable="haxe">
 			<arg line="build.hxml" />
@@ -21,17 +20,18 @@
 	</target>
 	
 	<target name="basis">
-			<exec dir="." failonerror="true" executable="haxe">
-				<arg line="build.hxml" />
-			</exec>
-			
-			<exec dir="." failonerror="true" executable="neko">
-				<arg line="objctohaxeextern.n" />
-				<arg line="in/" />
-				<arg line="out" />
-				<arg line="basis" />
-			</exec>
-		</target>
+		<delete dir="out"/>
+		<exec dir="." failonerror="true" executable="haxe">
+			<arg line="build.hxml" />
+		</exec>
+		
+		<exec dir="." failonerror="true" executable="neko">
+			<arg line="objctohaxeextern.n" />
+			<arg line="in/" />
+			<arg line="out" />
+			<arg line="basis" />
+		</exec>
+	</target>
 	
 	<target name="test">
 		<exec dir="." failonerror="true" executable="haxe">
@@ -40,5 +40,49 @@
 		<exec dir="." failonerror="true" executable="neko">
 			<arg line="test.n" />
 		</exec>
+	</target>
+	
+	<target name="copyheaders">
+		<delete dir="in"/>
+		<mkdir dir="in/apple/ui"/>
+		<copy todir="in/apple/ui">
+			<fileset dir="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/UIKit.framework/Headers">
+				<include name="UIActionSheet.h" />
+				<include name="UIActivityIndicatorView.h" />
+				<include name="UIAlertView.h" />
+				<include name="UIButton.h" />
+				<include name="UICollectionView.h" />
+				<include name="UICollectionViewCell.h" />
+				<include name="UIControl.h" />
+				<include name="UIDatePicker.h" />
+				<include name="UIImageView.h" />
+				<include name="UILabel.h" />
+				<include name="UINavigationBar.h" />
+				<include name="UIPageControl.h" />
+				<include name="UIPickerView.h" />
+				<include name="UIPopoverBackgroundView.h" />
+				<include name="UIProgressView.h" />
+				<include name="UIRefreshControl.h" />
+				<include name="UIResponder.h" />
+				<include name="UIScrollView.h" />
+				<include name="UISearchBar.h" />
+				<include name="UISegmentedControl.h" />
+				<include name="UISlider.h" />
+				<include name="UIStepper.h" />
+				<include name="UISwitch.h" />
+				<include name="UITabBar.h" />
+				<include name="UITabBarController.h" />
+				<include name="UITabBarItem.h" />
+				<include name="UITableView.h" />
+				<include name="UITableViewCell.h" />
+				<include name="UITableViewHeaderFooterView.h" />
+				<include name="UITextField.h" />
+				<include name="UITextView.h" />
+				<include name="UIToolbar.h" />
+				<include name="UIView.h" />
+				<include name="UIWebView.h" />
+				<include name="UIWindow.h" />
+			</fileset>
+		</copy>
 	</target>
 </project>
