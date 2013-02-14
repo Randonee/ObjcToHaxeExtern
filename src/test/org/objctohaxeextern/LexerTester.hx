@@ -44,6 +44,31 @@ class LexerTester extends haxe.unit.TestCase
     	assertEquals("enum", tokens[0]);
     }
     
+    public function testEnum2():Void
+    {
+	    var obj:Array<String> = ["typedef NS_ENUM(NSInteger, UITextBorderStyle) {\n",
+	    		"\tUITextBorderStyleNone,\n",
+	    		"\tUITextBorderStyleBezel,\n",
+	    		"\tUITextBorderStyleRoundedRect\n",
+	    		"};\n"];
+	    		
+	    		
+    	var lexer:Lexer = new Lexer();
+    	var tokens:Array<String> = lexer.createTokens(obj[0]);
+    	
+    	assertTrue(lexer.instructionSpansToNextLine);
+    	var index:Int = 1;
+    	while(lexer.instructionSpansToNextLine)
+    	{
+    		tokens = tokens.concat(lexer.createTokens(obj[index]));
+    		++index;
+    	}
+    	
+    	trace(tokens.join(","));
+    	
+    	assertEquals(15, tokens.length);
+    }
+    
     public function testEnumComentsAndValues():Void
     {
 	    var obj:Array<String> = ["typedef NS_ENUM(NSInteger, UIViewContentMode) {\n",

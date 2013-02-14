@@ -112,8 +112,6 @@ class Lexer
 		if(tokens[0] == "enum" || ( tokens[0] == "typedef" && ( tokens[1] == "NS_ENUM" || tokens[1] == "NS_OPTIONS") ) )
 		{
 			//typedef NS_ENUM(NSInteger, UIViewContentMode) {
-		
-		
 			tokens[0] = "enum";
 			
 			if(!containsChar(text, "}", 0))

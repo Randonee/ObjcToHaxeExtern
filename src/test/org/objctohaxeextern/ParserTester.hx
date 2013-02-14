@@ -105,7 +105,7 @@ class ParserTester extends haxe.unit.TestCase
     public function testIsClass():Void
     {
     	var clazz:Clazz = new Clazz();
-    	var tokens:Array<String> = ["NS_CLASS_AVAILABLE_IOS", "@", "interface", "SomeClass", ":", "ParentClass", "<", "protocol1", ",", "protocol2", ">", ";"];
+    	var tokens:Array<String> = ["NS_CLASS_AVAILABLE_IOS", "@", "interface", "SomeClass", ":", "ParentClass", "<", "protocol1", ",", "protocol2", ">"];
     	
     	var parser:Parser = new Parser();
     	assertTrue(parser.isClass(tokens));
@@ -155,4 +155,12 @@ class ParserTester extends haxe.unit.TestCase
     	assertEquals("val3", clazz.enumerations[0].elements[2].name);
     }
     
+    public function testEnumeration2()
+    {
+    	var clazz:Clazz = new Clazz();
+		var tokens:Array<String> = ["enum", "NS_ENUM", "(", "NSInteger", ",", "UITextBorderStyle", ")", "{", "UITextBorderStyleNone", ",", "UITextBorderStyleBezel", ",", "UITextBorderStyleRoundedRect", "}", ";"];
+    	var parser:Parser = new Parser();
+    	parser.parseEnum(tokens, clazz);
+    	assertEquals("UITextBorderStyle", clazz.enumerations[0].name);
+    }
 }

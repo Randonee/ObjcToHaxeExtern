@@ -120,7 +120,7 @@ class Parser
 		while(index < tokens.length && tokens[index] != "@")
 			++index;
 		
-		if(tokens[index] == "@" && (tokens[index+1] == "interface" || tokens[index+1] == "protocol"))
+		if(tokens[index] == "@" && (tokens[index+1] == "interface" || tokens[index+1] == "protocol") && tokens.join("").indexOf(";") == -1)
 			return true;
 			
 		return false;
@@ -352,6 +352,7 @@ class Parser
 			}
 			++index;
 		}
+		
 		clazz.enumerations.push(enumeration);
 	}
 	

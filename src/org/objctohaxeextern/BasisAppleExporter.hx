@@ -730,7 +730,6 @@ class BasisAppleExporter
 	
 	public function createEnum(enumeration:Enumeration):Void
 	{
-	
 		if(enumeration.name == "{" || enumeration.name == "")
 			return;
 	
