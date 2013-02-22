@@ -143,7 +143,7 @@ class BasisAppleExporter
 		_currentHxClassContent += "import cpp.Lib;\n";
 		_currentHxClassContent += "import basis.object.ObjectManager;\n";
 		_currentHxClassContent += "import basis.object.IObject;\n";
-		_currentHxClassContent += "import basis.ViewBase;\n";
+		_currentHxClassContent += "import basis.object.AbstractObject;\n";
 		_currentHxClassContent += "import apple.appkit.NSText;\n";
 		_currentHxClassContent += "import apple.appkit.NSParagraphStyle;\n";
 		_currentHxClassContent += "import apple.ui.UIkit;\n";
@@ -267,7 +267,7 @@ class BasisAppleExporter
 		{
 			_currentHxClassContent += " extends ";
 			if(clazz.name == "UIResponder")
-				_currentHxClassContent += "ViewBase";
+				_currentHxClassContent += "AbstractObject";
 			else
 				_currentHxClassContent +=  clazz.parentClassName;
 		}
@@ -569,7 +569,7 @@ class BasisAppleExporter
 		type = StringTools.replace(type, "*", "");
 		var newType:String = type;
 		
-		if(type != "NSURLRequest" && type != "NSURL" && type != "NSIndexPath"  && type != "NSIndexSet"   && type != "UIImage") 
+		if(type != "NSURLRequest" && type != "NSURL" && type != "NSIndexPath"  && type != "NSIndexSet"   && type != "UIImage" && type != "UIColor") 
 			newType = getHaxeType(type);
 		
 		if(newType != "Array<Float>" && newType != "Array<int>")
@@ -603,7 +603,8 @@ class BasisAppleExporter
 			case "CGSize":
 				cffiType += "CGSIZE_VAL";
 
-			case "UIColor":
+			case "CGColorRef":
+			case "CGColor":
 				cffiType += "CGCOLORREF_VAL";
 
 			case "NSURL":
@@ -626,6 +627,9 @@ class BasisAppleExporter
 				
 			case "UIImage":
 				cffiType += "UIIMAGE_VAL";
+				
+			case "UIColor":
+				cffiType += "UICOLOR_VAL";
 				
 			default:
 				cffiType += "OBJECT_VAL";
