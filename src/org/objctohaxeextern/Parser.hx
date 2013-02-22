@@ -306,6 +306,11 @@ class Parser
 		if(index < tokens.length && isOnlyAvaialbleInSDK(tokens[index]))
 			property.sdk = "ios_" + tokens[index+2];
 		
+		if(property.name == "<" || property.name == ">")
+		{
+			neko.Lib.println("Property skipped: " + tokens.join(" "));
+			return;
+		}
 		
 		clazz.properties.push(property);
 	}
