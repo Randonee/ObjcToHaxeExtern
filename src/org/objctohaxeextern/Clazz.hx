@@ -63,8 +63,8 @@ class Clazz
 	public var parentClassName(default, default):String;
 	public var protocols(default, null):Array<String>;
 	public var properties(default, default):Array<Property>;
-	public var methods(default, default):Hash<Array<Method>>;
-	public var staticMethods(default, default):Hash<Array<Method>>;
+	public var methods(default, default):Map<String, Array<Method>>;
+	public var staticMethods(default, default):Map<String, Array<Method>>;
 	public var constants(default, null):Array<Constant>;
 	public var enumerations(default, null):Array<Enumeration>;
 	public var structures(default, null):Array<Structure>;
@@ -82,8 +82,8 @@ class Clazz
 		isProtocol = false;
 		protocols = [];
 		properties = new Array<Property>();
-		methods = new Hash<Array<Method>>();
-		staticMethods = new Hash<Array<Method>>();
+		methods = new Map<String, Array<Method>>();
+		staticMethods = new Map<String, Array<Method>>();
 		enumerations = new Array<Enumeration>();
 		structures = new Array<Structure>();
 		constants = [];

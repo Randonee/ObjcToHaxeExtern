@@ -10,19 +10,19 @@ import sys.io.FileOutput;
 class ExternExporter
 {
 	public var parser(default, null):Parser;
-	private var _typesUsed:Hash<Bool>;
-	private var _typeObjToHaxe:Hash<String>;
+	private var _typesUsed:Map<String, Bool>;
+	private var _typeObjToHaxe:Map<String, String>;
 	
 	private var _protocolMethods:Array<Method>;
 	private var _protocolProperties:Array<Property>;
-	private var _methodsWritten:Hash<Bool>;
+	private var _methodsWritten:Map<String, Bool>;
 	
 	public function new(parser:Parser):Void
 	{
 		this.parser = parser;
 		createTypeConversionHash();
-		_typesUsed = new Hash<Bool>();
-		_methodsWritten = new Hash<Bool>();
+		_typesUsed = new Map<String, Bool>();
+		_methodsWritten = new Map<String, Bool>();
 	}
 	
 	public function export(destinationDirectory:String):Void
@@ -70,7 +70,7 @@ class ExternExporter
 	{
 		var contents:String = "";
 		var packagePath:String = "";
-		_typesUsed = new Hash<Bool>();
+		_typesUsed = new Map<String, Bool>();
 	
 		packagePath = createClassPackage(clazz);
 		contents += "package " + packagePath + ";\n\n";
@@ -85,7 +85,7 @@ class ExternExporter
 		
 			
 		//imports
-		var imports:Hash<Bool> = new Hash<Bool>();
+		var imports:Map<String, Bool> = new Map<String, Bool>();
 		for(type in _typesUsed.keys())
 		{
 			var importClass:Clazz = parser.classes.getHoldingClassForType(type);
@@ -111,7 +111,7 @@ class ExternExporter
 	{
 		_protocolMethods = [];
 		_protocolProperties = [];
-		_methodsWritten = new Hash<Bool>();
+		_methodsWritten = new Map<String, Bool>();
 	
 		if(clazz.name == "NSMutableArray")
 		 return "";
@@ -432,7 +432,7 @@ class ExternExporter
 	
 	private function createTypeConversionHash():Void
 	{
-		_typeObjToHaxe = new Hash<String>();
+		_typeObjToHaxe = new Map<String, String>();
 		_typeObjToHaxe.set("int", "Int");
 		_typeObjToHaxe.set("NSInteger", "Int");
 		_typeObjToHaxe.set("NSInteger*", "Int");

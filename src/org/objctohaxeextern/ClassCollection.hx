@@ -2,11 +2,11 @@ package org.objctohaxeextern;
 
 class ClassCollection
 {
-	public var items(default, null):Hash<Clazz>;
+	public var items(default, null):Map<String, Clazz>;
 	
 	public function new()
 	{
-		items = new Hash<Clazz>();
+		items = new Map<String, Clazz>();
 	}
 	
 	public function addClass(clazz:Clazz):Void

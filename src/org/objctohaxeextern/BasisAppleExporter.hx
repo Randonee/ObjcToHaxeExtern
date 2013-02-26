@@ -9,24 +9,25 @@ import sys.io.FileOutput;
 
 class BasisAppleExporter
 {
-	private static inline var TYPES_TO_IGNORE:Array<String> = ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
+	private static inline function TYPES_TO_IGNORE():Array<String>{
+																return ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
 																"UIGestureRecognizer", "UIEvent", "NSAttributedString",
 																"UIFont", "SEL", "NSSet", "UIViewController", "UIScreen",
 																"NSUndoManager", "NSDictionary", "UINavigationItem", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UIBarButtonItem", "UICollectionViewLayoutAttributes",
-																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem"];
+																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem"];}
 																
-	private static inline var RETURN_TYPES_TO_IGNORE:Array<String> = ["UIImage"];
+	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["UIImage"];}
 																
 
 	public var parser(default, null):Parser;
-	private var _typesUsed:Hash<Bool>;
-	private var _typeObjToHaxe:Hash<String>;
+	private var _typesUsed:Map<String, Bool>;
+	private var _typeObjToHaxe:Map<String, String>;
 	
 	private var _protocolMethods:Array<Method>;
 	private var _protocolProperties:Array<Property>;
-	private var _methodsWritten:Hash<Bool>;
+	private var _methodsWritten:Map<String, Bool>;
 	
 	private var _currentCppClassContent:String;
 	private var _currentHxClassContent:String;
@@ -131,7 +132,7 @@ class BasisAppleExporter
 	public function createClass(clazz:Clazz):Void
 	{
 		var packagePath:String = "";
-		_typesUsed = new Hash<Bool>();
+		_typesUsed = new Map<String, Bool>();
 	
 		packagePath = createClassPackage(clazz);
 		
@@ -160,7 +161,7 @@ class BasisAppleExporter
 	{
 		_protocolMethods = [];
 		_protocolProperties = [];
-		_methodsWritten = new Hash<Bool>();
+		_methodsWritten = new Map<String, Bool>();
 	
 		if(clazz.name == "NSMutableArray")
 		 return;
@@ -311,19 +312,19 @@ class BasisAppleExporter
 			if(shouldIgnorReturnType(property.type))
 				_currentHxClassContent += "null, ";
 			else
-				_currentHxClassContent += "get" + propNameUpper + ", ";
+				_currentHxClassContent += "get_" + property.name + ", ";
 				
 			if(property.readOnly)
 				_currentHxClassContent += "null)";
 			else
-				_currentHxClassContent += "set" + propNameUpper + ")";
+				_currentHxClassContent += "set_" + property.name + ")";
 				
 			_currentHxClassContent += ":" + argType + ";\n";
 			
 			
 		if(!shouldIgnorReturnType(property.type))
 		{	
-			_currentHxClassContent += "\tprivate function get" + propNameUpper + "():" + argType + "\n";
+			_currentHxClassContent += "\tprivate function get_" + property.name + "():" + argType + "\n";
 			_currentHxClassContent += "\t{\n";
 			_currentHxClassContent += "\t\treturn BasisApplication.instance.objectManager.callInstanceMethod(this, \"" + property.name +"\", [], [], " + convertToCFFIType(property.type) + ");\n";
 			_currentHxClassContent += "\t}\n";
@@ -332,7 +333,7 @@ class BasisAppleExporter
 		if(!property.readOnly)
 		{
 			_currentHxClassContent += "\n";
-			_currentHxClassContent += "\tprivate function set" + propNameUpper + "(value:" + argType + "):" + argType + "\n";
+			_currentHxClassContent += "\tprivate function set_" + property.name + "(value:" + argType + "):" + argType + "\n";
 			_currentHxClassContent += "\t{\n";
 			
 			_currentHxClassContent += "\t\tBasisApplication.instance.objectManager.callInstanceMethod(this, \"set" + propNameUpper +":\", [value], [" +  convertToCFFIType(property.type) +"], -1 );\n";
@@ -353,9 +354,9 @@ class BasisAppleExporter
 	public function shouldIgnorType(type:String):Bool
 	{
 		type = StringTools.replace(type, "*", "");
-		for(a in 0...TYPES_TO_IGNORE.length)
+		for(a in 0...TYPES_TO_IGNORE().length)
 		{
-			if(type == TYPES_TO_IGNORE[a])
+			if(type == TYPES_TO_IGNORE()[a])
 				return true;
 		}
 		
@@ -365,9 +366,9 @@ class BasisAppleExporter
 	public function shouldIgnorReturnType(type:String):Bool
 	{
 		type = StringTools.replace(type, "*", "");
-		for(a in 0...RETURN_TYPES_TO_IGNORE.length)
+		for(a in 0...RETURN_TYPES_TO_IGNORE().length)
 		{
-			if(type == RETURN_TYPES_TO_IGNORE[a])
+			if(type == RETURN_TYPES_TO_IGNORE()[a])
 				return true;
 		}
 		
@@ -385,10 +386,10 @@ class BasisAppleExporter
 	{
 		if(shouldIgnorType(method.returnType) || shouldIgnorReturnType(method.returnType) || method.deprecated || parser.classes.isMothodDefinedInSuperClass(method.name, clazz))
 			return;
-	
-		if(method.name.indexOf("init") == 0)
+		
+		if(method.name == "init")
 			return;
-			
+		
 		var content:String = "\t";
 		if(isStatic)
 			content += "static ";
@@ -468,11 +469,11 @@ class BasisAppleExporter
 			if( enumeration.elements[a].name.length <= 4)
 				return ;
 				
-			_currentHxClassContent += "\tpublic static inline var " + enumeration.elements[a].name + ":Int = ";
+			_currentHxClassContent += "\tpublic static inline function " + enumeration.elements[a].name + "():Int{return ";
 			if(enumeration.elements[a].value == "")
-				 _currentHxClassContent += a +";\n";
+				 _currentHxClassContent += a +";}\n";
 			else
-				_currentHxClassContent += " " + enumeration.elements[a].value +";\n";
+				_currentHxClassContent += " " + enumeration.elements[a].value +";}\n";
 		}
 		
 	}
@@ -499,7 +500,7 @@ class BasisAppleExporter
 	
 	public function createConstant(constant:Constant):Void
 	{
-		_currentHxClassContent += "//static public inline var " + constant.name + ":" + getHaxeType(constant.type) + ";";
+		_currentHxClassContent += "//static public inline function " + constant.name + "():" + getHaxeType(constant.type) + "{}";
 		addTypeUsed(constant.type);
 	}
 	
@@ -579,6 +580,15 @@ class BasisAppleExporter
 			
 		switch(type)
 		{
+			case "bool":
+				cffiType += "BOOL_VAL";
+				
+			case "Bool":
+				cffiType += "BOOL_VAL";
+				
+			case "BOOL":
+				cffiType += "BOOL_VAL";
+				
 			case "Int":
 				cffiType += "INT_VAL";
 				
@@ -640,7 +650,7 @@ class BasisAppleExporter
 	
 	private function createTypeConversionHash():Void
 	{
-		_typeObjToHaxe = new Hash<String>();
+		_typeObjToHaxe = new Map<String, String>();
 		_typeObjToHaxe.set("int", "Int");
 		_typeObjToHaxe.set("NSInteger", "Int");
 		_typeObjToHaxe.set("NSInteger*", "Int");

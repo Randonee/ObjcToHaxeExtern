@@ -2,7 +2,7 @@ package org.objctohaxeextern;
 
 class Lexer
 {
-	private static inline var opperators:Array<String> = [" ", "{", "}", "*", "(", ")", "/" , "-", "+", "@", "<", ">", '"', "'", "=" ,",", "^", ":", ";", "\n", "\t", "\r"];
+	private static inline function opperators():Array<String>{return [" ", "{", "}", "*", "(", ")", "/" , "-", "+", "@", "<", ">", '"', "'", "=" ,",", "^", ":", ";", "\n", "\t", "\r"];}
 	public var instructionSpansToNextLine(default, null):Bool;
 	
 	private var _inBlockComment:Bool;
@@ -131,9 +131,9 @@ class Lexer
 
 	private function isOpperator(opp:String):Bool
 	{
-		for(a in 0...opperators.length)
+		for(a in 0...opperators().length)
 		{
-			if(opperators[a] == opp)
+			if(opperators()[a] == opp)
 				return true;
 		}
 		return false;
