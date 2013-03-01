@@ -1,0 +1,1 @@
+	public static inline function UIViewDidMoveToSuperview():String{ return "UIViewDidMoveToSuperview";}

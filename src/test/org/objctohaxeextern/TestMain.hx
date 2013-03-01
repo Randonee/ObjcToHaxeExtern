@@ -9,6 +9,7 @@ class TestMain
         r.add(new LexerTester());
         r.add(new ExternExporterTester());
         r.add(new ClassCollectionTester());
+        r.add(new BasisAppleExporterTester());
         r.run();
     }
 }

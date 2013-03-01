@@ -28,12 +28,11 @@ class BasisAppleExporter
 	private var _protocolMethods:Array<Method>;
 	private var _protocolProperties:Array<Property>;
 	private var _methodsWritten:Map<String, Bool>;
+	private var _currentClassAdditionContent:String;
 	
-	private var _currentCppClassContent:String;
 	private var _currentHxClassContent:String;
 	
 	private var _enumNames:Array<String>;
-	
 	
 	public function new(parser:Parser):Void
 	{
@@ -73,38 +72,26 @@ class BasisAppleExporter
 		_enumNames.push("UITextSpellCheckingType");
 		_enumNames.push("UIKeyboardType");
 		
-		var cppIncludes:String = "";
-		
-		var cppSavePath:String = "";
 		var hxSavePath:String = "";
 		for(clazz in parser.classes.items)
 		{
-			_currentCppClassContent = "";
 			_currentHxClassContent = "";
 			if(! clazz.isProtocol)
 			{
 				neko.Lib.println("Export " + clazz.name);
 				
-				cppSavePath = destinationDirectory + "/cpp/" + clazz.savePath + "/" + clazz.name + "CFFI.mm";
-				cppIncludes += "#include \"" + clazz.savePath.substring(1) + "/" + clazz.name + "CFFI.mm\"\n";
-				
 				hxSavePath = destinationDirectory + "/hx/" + clazz.savePath + "/" + clazz.name + ".hx";
-				Util.createDirectory(destinationDirectory + "/cpp/" + clazz.savePath + "/");
 				Util.createDirectory(destinationDirectory + "/hx/" + clazz.savePath + "/");
 				
 				createClass(clazz);
 				
 				if(hxSavePath != "" && clazz.savePath != "")
 				{
-					saveClass(cppSavePath, _currentCppClassContent);
 					saveClass(hxSavePath, _currentHxClassContent);
-					cppSavePath = "";
 					hxSavePath = "";
 				}
 			}
 		}
-		
-		saveClass(destinationDirectory + "/cpp/GeneratedIncludes.mm", cppIncludes);
 		
 		neko.Lib.println("-----  Export Finished -----");
 	}
@@ -140,7 +127,6 @@ class BasisAppleExporter
 		_currentHxClassContent += "//https://github.com/Randonee/ObjcToHaxeExtern\n\n";
 		
 		_currentHxClassContent += "package " + packagePath + ";\n\n";
-		
 		_currentHxClassContent += "import cpp.Lib;\n";
 		_currentHxClassContent += "import basis.object.ObjectManager;\n";
 		_currentHxClassContent += "import basis.object.IObject;\n";
@@ -149,10 +135,7 @@ class BasisAppleExporter
 		_currentHxClassContent += "import apple.appkit.NSParagraphStyle;\n";
 		_currentHxClassContent += "import apple.ui.UIkit;\n";
 		_currentHxClassContent += "import basis.BasisApplication;\n";
-		
-		
 		_currentHxClassContent += "\n";
-		
 		
 		createActuallClass(clazz);
 	}
@@ -168,13 +151,22 @@ class BasisAppleExporter
 	
 		if(clazz.hasDefinition)
 		{
-			
 			createClassDefinition(clazz);
 			_currentHxClassContent += "\n{\n";
 			
+			_currentClassAdditionContent = "";
+			var additionsFilePath:String = "additions/" + clazz.savePath + "/" + clazz.name + ".hx";
+			if(FileSystem.exists(additionsFilePath))
+			{
+				_currentHxClassContent += "\n\t//Additions\n";
+				_currentClassAdditionContent = File.getContent(additionsFilePath);
+				_currentHxClassContent += _currentClassAdditionContent;
+				_currentHxClassContent += "\n\t//Additions\n";
+			}
+			
+			
 			if(isUIClass(clazz))
 			{
-			
 				_currentHxClassContent += "\n\tpublic function new(?type:Class<IObject>=null)\n";
 				_currentHxClassContent += "\t{\n";
 				_currentHxClassContent += "\t\tif(type == null)\n";
@@ -190,21 +182,12 @@ class BasisAppleExporter
 					_currentHxClassContent += "\n";
 				}
 				
-				
-				
 				_currentHxClassContent += "\n\t//Static Methods\n";
 				for(methods in clazz.staticMethods)
 				{
 					for(a in 0...methods.length)
-					{
-						//if(!clazz.isMethodDefined(methods[a].name))
-						//{
-						//createStaticMethod(method:Method, clazz, ?overloadNum:Int = 0, ?overrides:Bool=false):Void
-							createStaticMethod(methods[a], clazz) + "\n";
-						//}
-					}
+						createStaticMethod(methods[a], clazz) + "\n";
 				}
-			
 			
 				_currentHxClassContent += "\n\t//Properties\n";
 				for(a in 0...clazz.properties.length)
@@ -216,9 +199,7 @@ class BasisAppleExporter
 				for(methods in clazz.methods)
 				{
 					for(a in 0...methods.length)
-					{
 						createMethod(methods[a], clazz, a, parser.classes.isMothodDefinedInSuperClass(methods[a].name, clazz)) + "\n";
-					}
 				}
 				
 				if(_protocolMethods.length > 0 &&  !clazz.isProtocol)
@@ -231,7 +212,6 @@ class BasisAppleExporter
 							createMethod(_protocolMethods[a], clazz, 0, false) + "\n";
 						}
 					}
-					
 					
 					_currentHxClassContent += "\n\n\t//Protocol Properties\n";
 					for(a in 0..._protocolProperties.length)
@@ -249,13 +229,9 @@ class BasisAppleExporter
 			
 		_currentHxClassContent += "\n\n";
 		
-		/*
 		for(a in 0...clazz.structures.length)
-		{
 			createStructure(clazz.structures[a], clazz);
-			_currentHxClassContent += "\n\n";
-		}
-		*/
+			
 		_currentHxClassContent += "}\n\n";
 	}
 	
@@ -300,6 +276,9 @@ class BasisAppleExporter
 	public function createProperty(property:Property, clazz:Clazz):Void
 	{
 		if(shouldIgnorType(property.type) || property.deprecated || parser.classes.isPropertyDefinedInSuperClass(property.name, clazz))
+			return;
+			
+		if(fieldExistsInString(_currentClassAdditionContent, property.name))
 			return;
 			
 		var propNameUpper:String = property.name.charAt(0).toUpperCase() + property.name.substring(1);
@@ -406,6 +385,9 @@ class BasisAppleExporter
 			}
 			selector += ":";
 		}
+		
+		if(fieldExistsInString(_currentClassAdditionContent, methodName))
+			return;
 			
 		var cppName:String = clazz.name.toLowerCase() + "_" + methodName;
 		
@@ -480,22 +462,6 @@ class BasisAppleExporter
 	
 	public function createStructure(structure:Structure, clazz:Clazz):Void
 	{
-	/*
-		if(structure.name.charAt(0) == "_")
-			return "";
-	
-		var contents = "extern class " + structure.name + "\n";
-		contents += "{";
-		
-		contents += "\n\t public function new();";
-		
-		for(a in 0...structure.properties.length)
-		{
-			contents += "\n\t " + createProperty(structure.properties[a], clazz);
-		}
-		
-		contents += "\n}";
-		*/
 	}
 	
 	public function createConstant(constant:Constant):Void
@@ -557,6 +523,19 @@ class BasisAppleExporter
 		}
 			
 		return type;
+	}
+	
+	public function fieldExistsInString(str:String, field:String):Bool
+	{
+		var index:Int = str.indexOf(field + "(");
+		
+		if(index == -1)
+			return false;
+		
+		if(index > 0 && str.charAt(index-1) != " " )
+			return false;
+		
+		return true;
 	}
 	
 	private function addTypeUsed(type:String):Void
@@ -725,7 +704,6 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSRange", "Array<Int>");
 		_typeObjToHaxe.set("UIImage", "String");
 		_typeObjToHaxe.set("UIImage*", "String");
-		
 		
 		
 		_typeObjToHaxe.set("NSZone", "Dynamic");
