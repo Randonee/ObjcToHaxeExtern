@@ -72,9 +72,11 @@ class Clazz
 	public var classesInSameFile(default, default):Array<Clazz>;
 	public var isProtocol(default, default):Bool;
 	public var hasDefinition(default, default):Bool;
+	public var tokens(default, default):Array<String>;
 	
 	public function new(?name:String = ""):Void
 	{
+		tokens = [];
 		hasDefinition = false;
 		this.name = name;
 		parentClassName = "";
@@ -137,6 +139,17 @@ class Clazz
 			staticMethods.set(method.name, new Array<Method>());
 			
 		staticMethods.get(method.name).push(method);
+	}
+	
+	public function tokenExists(token:String):Bool
+	{
+		for(curToken in tokens)
+		{
+			if(token == curToken)
+				return true;
+		}
+		
+		return false;
 	}
 
 }

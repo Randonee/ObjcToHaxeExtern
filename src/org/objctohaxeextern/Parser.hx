@@ -99,6 +99,7 @@ class Parser
 						}
 						
 					}
+					currentClazz.tokens = currentClazz.tokens.concat(tokens);
 					tokens = [];
 				}
 				else

@@ -9,5 +9,14 @@
 	}
 	private static var uitableview_initWithFrameStyle = Lib.load ("basis", "uitableview_initWithFrameStyle", 2);
 
-	public var dataSource(default, default):UITableViewDataSource;
-	public var delegate(default, default):UITableViewDelegate;
+	public var dataSource(default, null):UITableViewDataSource;
+	public var delegate(default, null):UITableViewDelegate;
+	
+	public function new(?type:Class<IObject>=null)
+	{
+		if(type == null)
+			type = UITableView;
+		super(type);
+		dataSource = new UITableViewDataSource(this); 
+		delegate = new UITableViewDelegate(this);
+	}

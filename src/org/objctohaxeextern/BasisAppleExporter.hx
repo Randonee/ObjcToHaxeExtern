@@ -12,7 +12,7 @@ class BasisAppleExporter
 	private static inline function TYPES_TO_IGNORE():Array<String>{
 																return ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
 																"UIGestureRecognizer", "UIEvent", "NSAttributedString",
-																"UIFont", "SEL", "NSSet", "UIViewController", "UIScreen",
+																"SEL", "NSSet", "UIViewController", "UIScreen",
 																"NSUndoManager", "NSDictionary", "UINavigationItem", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UIBarButtonItem", "UICollectionViewLayoutAttributes",
@@ -118,6 +118,15 @@ class BasisAppleExporter
 	
 	public function createClass(clazz:Clazz):Void
 	{
+		// The UITextInputTraits protocal is implemented in a strange way so its properties need to be added manually to classes.
+		if(clazz.tokenExists("UITextInputTraits"))
+		{
+			var traitClass:Clazz = parser.classes.getClassForType("UITextInputTraits");
+			for(property in traitClass.properties)
+				clazz.properties.push(property);
+		}
+			
+	
 		var packagePath:String = "";
 		_typesUsed = new Map<String, Bool>();
 	
@@ -167,12 +176,15 @@ class BasisAppleExporter
 			
 			if(isUIClass(clazz))
 			{
-				_currentHxClassContent += "\n\tpublic function new(?type:Class<IObject>=null)\n";
-				_currentHxClassContent += "\t{\n";
-				_currentHxClassContent += "\t\tif(type == null)\n";
-				_currentHxClassContent += "\t\t\ttype = " + clazz.name  + ";\n";
-				_currentHxClassContent += "\t\tsuper(type);\n";
-				_currentHxClassContent += "\t}\n";
+				if(!fieldExistsInString(_currentClassAdditionContent, "function new"))
+				{
+					_currentHxClassContent += "\n\tpublic function new(?type:Class<IObject>=null)\n";
+					_currentHxClassContent += "\t{\n";
+					_currentHxClassContent += "\t\tif(type == null)\n";
+					_currentHxClassContent += "\t\t\ttype = " + clazz.name  + ";\n";
+					_currentHxClassContent += "\t\tsuper(type);\n";
+					_currentHxClassContent += "\t}\n";
+				}
 				
 				_currentHxClassContent += "\n\t//Constants\n";
 				for(a in 0...clazz.constants.length)
@@ -560,68 +572,71 @@ class BasisAppleExporter
 		switch(type)
 		{
 			case "bool":
-				cffiType += "BOOL_VAL";
+				cffiType += "BOOL_VAL()";
 				
 			case "Bool":
-				cffiType += "BOOL_VAL";
+				cffiType += "BOOL_VAL()";
 				
 			case "BOOL":
-				cffiType += "BOOL_VAL";
+				cffiType += "BOOL_VAL()";
 				
 			case "Int":
-				cffiType += "INT_VAL";
+				cffiType += "INT_VAL()";
 				
 			case "Float":
-				cffiType += "FLOAT_VAL";
+				cffiType += "FLOAT_VAL()";
 				
 			case "String":
-				cffiType += "STRING_VAL";
+				cffiType += "STRING_VAL()";
 				
 			case "CGRect":
-				cffiType += "CGRECT_VAL";
+				cffiType += "CGRECT_VAL()";
 				
 			case "UIEdgeInsets":
-				cffiType += "UIEDGEINSETS_VAL";
+				cffiType += "UIEDGEINSETS_VAL()";
 				
 			case "CGAffineTransform":
-				cffiType += "CGAFFINETRANSFORM_VAL";
+				cffiType += "CGAFFINETRANSFORM_VAL()";
 
 			case "CGPoint":
-				cffiType += "CGPOINT_VAL";
+				cffiType += "CGPOINT_VAL()";
 
 			case "CGSize":
-				cffiType += "CGSIZE_VAL";
+				cffiType += "CGSIZE_VAL()";
 
 			case "CGColorRef":
 			case "CGColor":
-				cffiType += "CGCOLORREF_VAL";
+				cffiType += "CGCOLORREF_VAL()";
 
 			case "NSURL":
-				cffiType += "NSURL_VAL";
+				cffiType += "NSURL_VAL()";
 				
 			case "NSURLRequest":
-				cffiType += "NSURLREQUEST_VAL";
+				cffiType += "NSURLREQUEST_VAL()";
 
 			case "NSIndexPath":
-				cffiType += "NSINDEXPATH_VAL";
+				cffiType += "NSINDEXPATH_VAL()";
 
 			case "NSIndexSet":
-				cffiType += "NSINDEXSET_VAL";
+				cffiType += "NSINDEXSET_VAL()";
 
 			case "NSRange":
-				cffiType += "NSRANGE_VAL";
+				cffiType += "NSRANGE_VAL()";
 
 			case "UIOffset":
-				cffiType += "UIOFFSET_VAL";
+				cffiType += "UIOFFSET_VAL()";
 				
 			case "UIImage":
-				cffiType += "UIIMAGE_VAL";
+				cffiType += "UIIMAGE_VAL()";
 				
 			case "UIColor":
-				cffiType += "UICOLOR_VAL";
+				cffiType += "UICOLOR_VAL()";
+				
+			case "UIFont":
+				cffiType += "UIFONT_VAL()";
 				
 			default:
-				cffiType += "OBJECT_VAL";
+				cffiType += "OBJECT_VAL()";
 		}
 		
 		return cffiType;

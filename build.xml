@@ -76,6 +76,7 @@
 				<include name="UITableView.h" />
 				<include name="UITableViewCell.h" />
 				<include name="UITableViewHeaderFooterView.h" />
+				<include name="UITextInputTraits.h" />
 				<include name="UITextField.h" />
 				<include name="UITextView.h" />
 				<include name="UIToolbar.h" />
