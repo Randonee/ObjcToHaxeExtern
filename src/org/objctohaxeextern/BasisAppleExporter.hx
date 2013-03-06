@@ -317,7 +317,7 @@ class BasisAppleExporter
 		{	
 			_currentHxClassContent += "\tprivate function get_" + property.name + "():" + argType + "\n";
 			_currentHxClassContent += "\t{\n";
-			_currentHxClassContent += "\t\treturn BasisApplication.instance.objectManager.callInstanceMethod(this, \"" + property.name +"\", [], [], " + convertToCFFIType(property.type) + ");\n";
+			_currentHxClassContent += "\t\treturn BasisApplication.instance.objectManager.callInstanceMethod(this, \"" + property.getterName +"\", [], [], " + convertToCFFIType(property.type) + ");\n";
 			_currentHxClassContent += "\t}\n";
 		}
 		
@@ -327,7 +327,11 @@ class BasisAppleExporter
 			_currentHxClassContent += "\tprivate function set_" + property.name + "(value:" + argType + "):" + argType + "\n";
 			_currentHxClassContent += "\t{\n";
 			
-			_currentHxClassContent += "\t\tBasisApplication.instance.objectManager.callInstanceMethod(this, \"set" + propNameUpper +":\", [value], [" +  convertToCFFIType(property.type) +"], -1 );\n";
+			var setterName:String = "set" + propNameUpper;
+			if(property.name != property.setterName)
+				setterName = property.setterName;
+			
+			_currentHxClassContent += "\t\tBasisApplication.instance.objectManager.callInstanceMethod(this, \"" + setterName +":\", [value], [" +  convertToCFFIType(property.type) +"], -1 );\n";
 			if(!shouldIgnorReturnType(property.type))
 				_currentHxClassContent += "\t\treturn " + property.name + ";\n";
 			else

@@ -13,7 +13,9 @@ typedef Property =
 	readOnly:Bool,
 	sdk:String,
 	type:String,
-	deprecated:Bool
+	deprecated:Bool,
+	getterName:String,
+	setterName:String
 }
 
 typedef Method = 

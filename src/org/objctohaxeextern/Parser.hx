@@ -273,7 +273,7 @@ class Parser
 		if(tokens[tokens.length - 1] == ";")
 			tokens.pop();
 		
-		var property:Property = {name:"", readOnly:false, sdk:"", type:"", deprecated:isDeprecated(tokens.join(""))};
+		var property:Property = {name:"", readOnly:false, sdk:"", type:"", deprecated:isDeprecated(tokens.join("")), getterName:"", setterName:""};
 		
 		var index:Int = 0;
 		while(tokens[index] != "property" && index < tokens.length)
@@ -287,6 +287,10 @@ class Parser
 			{
 				if(tokens[index] == "readonly")
 					property.readOnly = true;
+				else if(tokens[index] == "getter")
+					property.getterName = tokens[index+2];
+				else if(tokens[index] == "setter")
+					property.setterName = tokens[index+2];
 			 	++index;
 			}
 		}
@@ -312,6 +316,12 @@ class Parser
 			neko.Lib.println("Property skipped: " + tokens.join(" "));
 			return;
 		}
+		
+		if(property.getterName == "")
+			property.getterName = property.name;
+			
+		if(property.setterName == "")
+			property.setterName = property.name;
 		
 		clazz.properties.push(property);
 	}
@@ -385,7 +395,7 @@ class Parser
 		++index;
 		while(index < tokens.length && tokens[index] != "}")
 		{
-			var prop:Property = {name:"", readOnly:false, sdk:"", type:"", deprecated:false};
+			var prop:Property = {name:"", readOnly:false, sdk:"", type:"", deprecated:false, getterName:"", setterName:""};
 			var more:Bool = true;
 			
 			while(more)
@@ -425,7 +435,7 @@ class Parser
 			{
 				if(tokens[index] == ",")
 				{
-					var prop2:Property = {name:tokens[index+1], readOnly:false, sdk:"", type:prop.type, deprecated:false};
+					var prop2:Property = {name:tokens[index+1], readOnly:false, sdk:"", type:prop.type, deprecated:false, getterName:"", setterName:""};
 					structure.properties.push(prop2);
 				}
 				++index;
