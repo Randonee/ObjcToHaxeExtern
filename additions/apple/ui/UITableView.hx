@@ -8,7 +8,7 @@
 		return null;
 	}
 	private static var uitableview_initWithFrameStyle = Lib.load ("basis", "uitableview_initWithFrameStyle", 2);
-
+	
 	public var dataSource(default, null):UITableViewDataSource;
 	public var delegate(default, null):UITableViewDelegate;
 	
@@ -20,3 +20,10 @@
 		dataSource = new UITableViewDataSource(this); 
 		delegate = new UITableViewDelegate(this);
 	}
+	
+	public function deleteRowsAtIndexPathsWithRowAnimation(indexPaths:Array<Array<Int>>, animate:Bool):Void
+	{
+		uitableview_deleteRowsAtIndexPathsWithRowAnimation(basisID, indexPaths, animate);
+	}
+	private static var uitableview_deleteRowsAtIndexPathsWithRowAnimation = Lib.load ("basis", "uitableview_deleteRowsAtIndexPathsWithRowAnimation", 3);
+	
