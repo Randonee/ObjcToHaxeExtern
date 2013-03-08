@@ -13,9 +13,9 @@ class BasisAppleExporter
 																return ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
 																"UIGestureRecognizer", "UIEvent", "NSAttributedString",
 																"SEL", "NSSet", "UIViewController", "UIScreen",
-																"NSUndoManager", "NSDictionary", "UINavigationItem", "UIPanGestureRecognizer",
+																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib",
-																"UICollectionViewLayout", "UIBarButtonItem", "UICollectionViewLayoutAttributes",
+																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
 																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem"];}
 																
 	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["UIImage"];}
@@ -145,6 +145,15 @@ class BasisAppleExporter
 		_currentHxClassContent += "\n";
 		
 		createActuallClass(clazz);
+		
+		for(subClass in clazz.classesInSameFile)
+		{
+			if(subClass.parentClassName != "" && subClass.name.toLowerCase().indexOf("delegate") == -1 && !parser.classes.items.exists(subClass.name))
+			{
+				trace(subClass.name);
+				createActuallClass(subClass);
+			}
+		}
 	}
 	
 	private function createActuallClass(clazz:Clazz):Void
@@ -172,62 +181,59 @@ class BasisAppleExporter
 			}
 			
 			
-			if(isUIClass(clazz))
+			if(!fieldExistsInString(_currentClassAdditionContent, "function new"))
 			{
-				if(!fieldExistsInString(_currentClassAdditionContent, "function new"))
-				{
-					_currentHxClassContent += "\n\tpublic function new(?type:Class<IObject>=null)\n";
-					_currentHxClassContent += "\t{\n";
-					_currentHxClassContent += "\t\tif(type == null)\n";
-					_currentHxClassContent += "\t\t\ttype = " + clazz.name  + ";\n";
-					_currentHxClassContent += "\t\tsuper(type);\n";
-					_currentHxClassContent += "\t}\n";
-				}
-				
-				_currentHxClassContent += "\n\t//Constants\n";
-				for(a in 0...clazz.constants.length)
-				{
-					_currentHxClassContent += "\t";
-					createConstant(clazz.constants[a]);
-					_currentHxClassContent += "\n";
-				}
-				
-				_currentHxClassContent += "\n\t//Static Methods\n";
-				for(methods in clazz.staticMethods)
-				{
-					for(a in 0...methods.length)
-						createStaticMethod(methods[a], clazz) + "\n";
-				}
+				_currentHxClassContent += "\n\tpublic function new(?type:Class<IObject>=null)\n";
+				_currentHxClassContent += "\t{\n";
+				_currentHxClassContent += "\t\tif(type == null)\n";
+				_currentHxClassContent += "\t\t\ttype = " + clazz.name  + ";\n";
+				_currentHxClassContent += "\t\tsuper(type);\n";
+				_currentHxClassContent += "\t}\n";
+			}
 			
-				_currentHxClassContent += "\n\t//Properties\n";
-				for(a in 0...clazz.properties.length)
+			_currentHxClassContent += "\n\t//Constants\n";
+			for(a in 0...clazz.constants.length)
+			{
+				_currentHxClassContent += "\t";
+				createConstant(clazz.constants[a]);
+				_currentHxClassContent += "\n";
+			}
+			
+			_currentHxClassContent += "\n\t//Static Methods\n";
+			for(methods in clazz.staticMethods)
+			{
+				for(a in 0...methods.length)
+					createStaticMethod(methods[a], clazz) + "\n";
+			}
+		
+			_currentHxClassContent += "\n\t//Properties\n";
+			for(a in 0...clazz.properties.length)
+			{
+				createProperty(clazz.properties[a], clazz) + "\n";
+			}
+				
+			_currentHxClassContent += "\n\t//Methods\n";
+			for(methods in clazz.methods)
+			{
+				for(a in 0...methods.length)
+					createMethod(methods[a], clazz, a, parser.classes.isMothodDefinedInSuperClass(methods[a].name, clazz)) + "\n";
+			}
+			
+			if(_protocolMethods.length > 0 &&  !clazz.isProtocol)
+			{
+				_currentHxClassContent += "\n\n\t//Protocol Methods\n";
+				for(a in 0..._protocolMethods.length)
 				{
-					createProperty(clazz.properties[a], clazz) + "\n";
-				}
-					
-				_currentHxClassContent += "\n\t//Methods\n";
-				for(methods in clazz.methods)
-				{
-					for(a in 0...methods.length)
-						createMethod(methods[a], clazz, a, parser.classes.isMothodDefinedInSuperClass(methods[a].name, clazz)) + "\n";
+					if(!clazz.isMethodDefined(_protocolMethods[a].name) && !parser.classes.isMothodDefinedInSuperClass(_protocolMethods[a].name, clazz) && !_methodsWritten.exists(_protocolMethods[a].name))
+					{
+						createMethod(_protocolMethods[a], clazz, 0, false) + "\n";
+					}
 				}
 				
-				if(_protocolMethods.length > 0 &&  !clazz.isProtocol)
+				_currentHxClassContent += "\n\n\t//Protocol Properties\n";
+				for(a in 0..._protocolProperties.length)
 				{
-					_currentHxClassContent += "\n\n\t//Protocol Methods\n";
-					for(a in 0..._protocolMethods.length)
-					{
-						if(!clazz.isMethodDefined(_protocolMethods[a].name) && !parser.classes.isMothodDefinedInSuperClass(_protocolMethods[a].name, clazz) && !_methodsWritten.exists(_protocolMethods[a].name))
-						{
-							createMethod(_protocolMethods[a], clazz, 0, false) + "\n";
-						}
-					}
-					
-					_currentHxClassContent += "\n\n\t//Protocol Properties\n";
-					for(a in 0..._protocolProperties.length)
-					{
-						createProperty(_protocolProperties[a], clazz) + "\n";
-					}
+					createProperty(_protocolProperties[a], clazz) + "\n";
 				}
 			}
 		}
@@ -250,14 +256,11 @@ class BasisAppleExporter
 	{
 		_currentHxClassContent += "class " + clazz.name;
 		
-		if(clazz.parentClassName != "" && (isUIClass(clazz) || clazz.name == "UIResponder") )
-		{
-			_currentHxClassContent += " extends ";
-			if(clazz.name == "UIResponder")
-				_currentHxClassContent += "AbstractObject";
-			else
-				_currentHxClassContent +=  clazz.parentClassName;
-		}
+		_currentHxClassContent += " extends ";
+		if(clazz.parentClassName == "NSObject")
+			_currentHxClassContent += "AbstractObject";
+		else
+			_currentHxClassContent +=  clazz.parentClassName;
 	}
 	
 	private function addProtocolMethods(clazz:Clazz):Void
@@ -493,17 +496,8 @@ class BasisAppleExporter
 		return packagePath;
 	}
 	
-	private function isUIClass(clazz:Clazz):Bool
-	{
-		if(clazz == null)
-			return false;
-			
-		return parser.classes.deosClassExtendFromClass(clazz, "UIView");
-	}
-	
 	public function getHaxeType(objcType:String):String
 	{
-	
 		var type:String = objcType;
 		
 		if(type.indexOf("const") >= 0)

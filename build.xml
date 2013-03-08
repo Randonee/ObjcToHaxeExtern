@@ -51,6 +51,8 @@
 				<include name="UIActivityIndicatorView.h" />
 				<include name="UIAlertView.h" />
 				<include name="UIButton.h" />
+				<include name="UIBarButtonItem.h" />
+				<include name="UIBarItem.h" />
 				<include name="UICollectionView.h" />
 				<include name="UICollectionViewCell.h" />
 				<include name="UIControl.h" />
@@ -58,6 +60,7 @@
 				<include name="UIImageView.h" />
 				<include name="UILabel.h" />
 				<include name="UINavigationBar.h" />
+				<include name="UINavigationItem.h" />
 				<include name="UIPageControl.h" />
 				<include name="UIPickerView.h" />
 				<include name="UIPopoverBackgroundView.h" />
@@ -71,7 +74,6 @@
 				<include name="UIStepper.h" />
 				<include name="UISwitch.h" />
 				<include name="UITabBar.h" />
-				<include name="UITabBarController.h" />
 				<include name="UITabBarItem.h" />
 				<include name="UITableView.h" />
 				<include name="UITableViewCell.h" />
