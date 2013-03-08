@@ -137,13 +137,11 @@ class BasisAppleExporter
 		
 		_currentHxClassContent += "package " + packagePath + ";\n\n";
 		_currentHxClassContent += "import cpp.Lib;\n";
-		_currentHxClassContent += "import basis.object.ObjectManager;\n";
-		_currentHxClassContent += "import basis.object.IObject;\n";
-		_currentHxClassContent += "import basis.object.AbstractObject;\n";
-		_currentHxClassContent += "import apple.appkit.NSText;\n";
-		_currentHxClassContent += "import apple.appkit.NSParagraphStyle;\n";
-		_currentHxClassContent += "import apple.ui.UIkit;\n";
+		_currentHxClassContent += "import basis.object.*;\n";
+		_currentHxClassContent += "import apple.appkit.*;\n";
+		_currentHxClassContent += "import apple.ui.*;\n";
 		_currentHxClassContent += "import basis.BasisApplication;\n";
+		_currentHxClassContent += "import basis.object.TypeValues;\n";
 		_currentHxClassContent += "\n";
 		
 		createActuallClass(clazz);
@@ -571,76 +569,76 @@ class BasisAppleExporter
 		if(newType != "Array<Float>" && newType != "Array<int>")
 			type = newType;
 			
-		var cffiType = "ObjectManager.";
+		var cffiType = "TypeValues.";
 			
 		switch(type)
 		{
 			case "bool":
-				cffiType += "BOOL_VAL()";
+				cffiType += "BoolVal()";
 				
 			case "Bool":
-				cffiType += "BOOL_VAL()";
+				cffiType += "BoolVal()";
 				
 			case "BOOL":
-				cffiType += "BOOL_VAL()";
+				cffiType += "BoolVal()";
 				
 			case "Int":
-				cffiType += "INT_VAL()";
+				cffiType += "IntVal()";
 				
 			case "Float":
-				cffiType += "FLOAT_VAL()";
+				cffiType += "FloatVal()";
 				
 			case "String":
-				cffiType += "STRING_VAL()";
+				cffiType += "StringVal()";
 				
 			case "CGRect":
-				cffiType += "CGRECT_VAL()";
+				cffiType += "CGRectVal()";
 				
 			case "UIEdgeInsets":
-				cffiType += "UIEDGEINSETS_VAL()";
+				cffiType += "UIEdgeInsetsVal()";
 				
 			case "CGAffineTransform":
-				cffiType += "CGAFFINETRANSFORM_VAL()";
+				cffiType += "CGAffineTransformVal()";
 
 			case "CGPoint":
-				cffiType += "CGPOINT_VAL()";
+				cffiType += "CGPointVal()";
 
 			case "CGSize":
-				cffiType += "CGSIZE_VAL()";
+				cffiType += "CGSizeVal()";
 
 			case "CGColorRef":
 			case "CGColor":
-				cffiType += "CGCOLORREF_VAL()";
+				cffiType += "CGColorRefVal()";
 
 			case "NSURL":
-				cffiType += "NSURL_VAL()";
+				cffiType += "NSURLVal()";
 				
 			case "NSURLRequest":
-				cffiType += "NSURLREQUEST_VAL()";
+				cffiType += "NSURLRequestVal()";
 
 			case "NSIndexPath":
-				cffiType += "NSINDEXPATH_VAL()";
+				cffiType += "NSIndexPathVal()";
 
 			case "NSIndexSet":
-				cffiType += "NSINDEXSET_VAL()";
+				cffiType += "NSIndexSetVal()";
 
 			case "NSRange":
-				cffiType += "NSRANGE_VAL()";
+				cffiType += "NSRangeVal()";
 
 			case "UIOffset":
-				cffiType += "UIOFFSET_VAL()";
+				cffiType += "UIOffsetVal()";
 				
 			case "UIImage":
-				cffiType += "UIIMAGE_VAL()";
+				cffiType += "UIImageVal()";
 				
 			case "UIColor":
-				cffiType += "UICOLOR_VAL()";
+				cffiType += "UIColorVal()";
 				
 			case "UIFont":
-				cffiType += "UIFONT_VAL()";
+				cffiType += "UIFontVal()";
 				
 			default:
-				cffiType += "OBJECT_VAL()";
+				cffiType += "ObjectVal()";
 		}
 		
 		return cffiType;
