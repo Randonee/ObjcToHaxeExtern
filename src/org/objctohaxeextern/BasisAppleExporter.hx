@@ -133,7 +133,7 @@ class BasisAppleExporter
 		packagePath = createClassPackage(clazz);
 		
 		_currentHxClassContent += "//This code was generated using ObjcToHaxeExtern\n";
-		_currentHxClassContent += "//https://github.com/Randonee/ObjcToHaxeExtern\n\n";
+		_currentHxClassContent += "//https:/github.com/Randonee/ObjcToHaxeExtern\n\n";
 		
 		_currentHxClassContent += "package " + packagePath + ";\n\n";
 		_currentHxClassContent += "import cpp.Lib;\n";
