@@ -1,15 +1,11 @@
 package org.objctohaxeextern;
 
-
 import sys.FileSystem;
 import sys.io.File;
-
 import neko.Lib;
-
 
 class Main
 {
-
 	static public var headers:String;
 
 	public static function main()
@@ -38,6 +34,4 @@ class Main
 			}
 		}
 	}
-	
-	
 }

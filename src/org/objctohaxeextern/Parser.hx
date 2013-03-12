@@ -1,6 +1,5 @@
 package org.objctohaxeextern;
 
-
 import sys.FileSystem;
 import sys.io.File;
 import sys.io.FileInput;
@@ -389,8 +388,6 @@ class Parser
 			return;
 	
 		var structure:Structure = {name:name, properties:new Array<Property>()};
-		
-		
 			
 		++index;
 		while(index < tokens.length && tokens[index] != "}")
@@ -440,7 +437,6 @@ class Parser
 				}
 				++index;
 			}
-				
 			++index;
 		}
 		if(structure.properties.length > 0)

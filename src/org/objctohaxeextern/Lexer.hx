@@ -190,12 +190,10 @@ class Lexer
 					return text.substring(a+1);
 				else
 					return "";
-				
 			}
 			
 			++a;
 		}
-		
 		return "";
 	}
 

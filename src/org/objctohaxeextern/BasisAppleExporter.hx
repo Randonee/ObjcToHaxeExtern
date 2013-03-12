@@ -24,14 +24,11 @@ class BasisAppleExporter
 	public var parser(default, null):Parser;
 	private var _typesUsed:Map<String, Bool>;
 	private var _typeObjToHaxe:Map<String, String>;
-	
 	private var _protocolMethods:Array<Method>;
 	private var _protocolProperties:Array<Property>;
 	private var _methodsWritten:Map<String, Bool>;
 	private var _currentClassAdditionContent:String;
-	
 	private var _currentHxClassContent:String;
-	
 	private var _enumNames:Array<String>;
 	
 	public function new(parser:Parser):Void
@@ -342,9 +339,6 @@ class BasisAppleExporter
 			_currentHxClassContent += "\t}\n";
 		}
 		_currentHxClassContent += "\n";
-		
-		
-		
 	}
 	
 	public function shouldIgnorType(type:String):Bool
@@ -512,8 +506,6 @@ class BasisAppleExporter
 			
 		while( type.charAt(type.length-1) == "*")
 			type = type.substring(0, type.length-1);
-		
-		
 			
 		//Not sure what to do with c Blocks. Making Dynamic for now
 		if(type.indexOf("^") > -1)
