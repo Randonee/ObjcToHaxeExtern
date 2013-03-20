@@ -57,18 +57,22 @@
 				<include name="UICollectionViewCell.h" />
 				<include name="UIControl.h" />
 				<include name="UIDatePicker.h" />
+				<include name="UIImagePickerController.h" />
 				<include name="UIImageView.h" />
 				<include name="UILabel.h" />
+				<include name="UINavigationController.h" />
 				<include name="UINavigationBar.h" />
 				<include name="UINavigationItem.h" />
 				<include name="UIPageControl.h" />
 				<include name="UIPickerView.h" />
 				<include name="UIPopoverBackgroundView.h" />
+				<include name="UIPopoverController.h" />
 				<include name="UIProgressView.h" />
 				<include name="UIRefreshControl.h" />
 				<include name="UIResponder.h" />
 				<include name="UIScrollView.h" />
 				<include name="UISearchBar.h" />
+				<include name="UISearchDisplayController.h" />
 				<include name="UISegmentedControl.h" />
 				<include name="UISlider.h" />
 				<include name="UIStepper.h" />
@@ -83,6 +87,7 @@
 				<include name="UITextView.h" />
 				<include name="UIToolbar.h" />
 				<include name="UIView.h" />
+				<include name="UIViewController.h" />
 				<include name="UIWebView.h" />
 				<include name="UIWindow.h" />
 			</fileset>

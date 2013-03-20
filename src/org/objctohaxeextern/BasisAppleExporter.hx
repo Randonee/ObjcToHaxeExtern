@@ -11,8 +11,8 @@ class BasisAppleExporter
 {
 	private static inline function TYPES_TO_IGNORE():Array<String>{
 																return ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
-																"UIGestureRecognizer", "UIEvent", "NSAttributedString",
-																"SEL", "NSSet", "UIViewController", "UIScreen",
+																"UIGestureRecognizer", "UIEvent", "NSAttributedString", "UIStoryboard", "UIStoryboardSegue",
+																"SEL", "NSSet", "UIViewController", "UIScreen", "NSBundle",
 																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
@@ -68,6 +68,7 @@ class BasisAppleExporter
 		_enumNames.push("UITextAutocorrectionType");
 		_enumNames.push("UITextSpellCheckingType");
 		_enumNames.push("UIKeyboardType");
+		_enumNames.push("UIInterfaceOrientation");
 		
 		var hxSavePath:String = "";
 		for(clazz in parser.classes.items)
@@ -462,11 +463,13 @@ class BasisAppleExporter
 			if( enumeration.elements[a].name.length <= 4)
 				return ;
 				
+			var enumValue:String = StringTools.replace(enumeration.elements[a].value, "UL", "");
+				
 			_currentHxClassContent += "\tpublic static inline function " + enumeration.elements[a].name + "():Int{return ";
 			if(enumeration.elements[a].value == "")
 				 _currentHxClassContent += a +";}\n";
 			else
-				_currentHxClassContent += " " + enumeration.elements[a].value +";}\n";
+				_currentHxClassContent += " " + enumValue +";}\n";
 		}
 		
 	}
