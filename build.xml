@@ -80,6 +80,7 @@
 				<include name="UITabBar.h" />
 				<include name="UITabBarItem.h" />
 				<include name="UITableView.h" />
+				<include name="UITableViewController.h" />
 				<include name="UITableViewCell.h" />
 				<include name="UITableViewHeaderFooterView.h" />
 				<include name="UITextInputTraits.h" />
