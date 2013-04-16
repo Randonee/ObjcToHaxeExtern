@@ -10,8 +10,8 @@
 		delegate = new UIImagePickerControllerDelegate(this);
 	}
 	
-	static function isSourceTypeAvailable(sourceType:Int):Bool
+	public static function isSourceTypeAvailable(sourceType:Int):Bool
 	{
-		return uitableview_initWithFrameStyle(uiimagepickercontroller_isSourceTypeAvailable(sourceType));
+		return uiimagepickercontroller_isSourceTypeAvailable(sourceType);
 	}
 	private static var uiimagepickercontroller_isSourceTypeAvailable = Lib.load ("basis", "uiimagepickercontroller_isSourceTypeAvailable", 1);
