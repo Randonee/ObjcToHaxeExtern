@@ -1,4 +1,4 @@
-	public static inline function UIViewDidMoveToSuperview():String{ return "UIViewDidMoveToSuperview";}
+	public static inline var UIViewDidMoveToSuperview:String = "UIViewDidMoveToSuperview";
 	
 	static public function animateWithDurationDelayOptionsAnimationsCompletion(duration:Float, delay:Float, options:Int, animationsHandler:Void->Void, compleationHander:Bool->Void)
 	{

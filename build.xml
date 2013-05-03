@@ -50,6 +50,7 @@
 				<include name="UIActionSheet.h" />
 				<include name="UIActivityIndicatorView.h" />
 				<include name="UIAlertView.h" />
+				<include name="UIApplication.h" />
 				<include name="UIButton.h" />
 				<include name="UIBarButtonItem.h" />
 				<include name="UIBarItem.h" />

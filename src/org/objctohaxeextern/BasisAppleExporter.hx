@@ -12,7 +12,7 @@ class BasisAppleExporter
 	private static inline function TYPES_TO_IGNORE():Array<String>{
 																return ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
 																"UIGestureRecognizer", "UIEvent", "NSAttributedString", "UIStoryboard", "UIStoryboardSegue",
-																"SEL", "NSSet", "UIViewController", "UIScreen", "NSBundle",
+																"SEL", "NSSet", "UIViewController", "UIScreen", "NSBundle", "UILocalNotification", "UIBackgroundTaskIdentifier",
 																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
@@ -465,11 +465,11 @@ class BasisAppleExporter
 				
 			var enumValue:String = StringTools.replace(enumeration.elements[a].value, "UL", "");
 				
-			_currentHxClassContent += "\tpublic static inline function " + enumeration.elements[a].name + "():Int{return ";
+			_currentHxClassContent += "\tpublic static inline var " + enumeration.elements[a].name + ":Int = ";
 			if(enumeration.elements[a].value == "")
-				 _currentHxClassContent += a +";}\n";
+				 _currentHxClassContent += a +";\n";
 			else
-				_currentHxClassContent += " " + enumValue +";}\n";
+				_currentHxClassContent += " " + enumValue +";\n";
 		}
 		
 	}
@@ -563,71 +563,71 @@ class BasisAppleExporter
 		switch(type)
 		{
 			case "bool":
-				cffiType += "BoolVal()";
+				cffiType += "BoolVal";
 				
 			case "Bool":
-				cffiType += "BoolVal()";
+				cffiType += "BoolVal";
 				
 			case "BOOL":
-				cffiType += "BoolVal()";
+				cffiType += "BoolVal";
 				
 			case "Int":
-				cffiType += "IntVal()";
+				cffiType += "IntVal";
 				
 			case "Float":
-				cffiType += "FloatVal()";
+				cffiType += "FloatVal";
 				
 			case "String":
-				cffiType += "StringVal()";
+				cffiType += "StringVal";
 				
 			case "CGRect":
-				cffiType += "CGRectVal()";
+				cffiType += "CGRectVal";
 				
 			case "UIEdgeInsets":
-				cffiType += "UIEdgeInsetsVal()";
+				cffiType += "UIEdgeInsetsVal";
 				
 			case "CGAffineTransform":
-				cffiType += "CGAffineTransformVal()";
+				cffiType += "CGAffineTransformVal";
 
 			case "CGPoint":
-				cffiType += "CGPointVal()";
+				cffiType += "CGPointVal";
 
 			case "CGSize":
-				cffiType += "CGSizeVal()";
+				cffiType += "CGSizeVal";
 
 			case "CGColorRef":
 			case "CGColor":
-				cffiType += "CGColorRefVal()";
+				cffiType += "CGColorRefVal";
 
 			case "NSURL":
-				cffiType += "NSURLVal()";
+				cffiType += "NSURLVal";
 				
 			case "NSURLRequest":
-				cffiType += "NSURLRequestVal()";
+				cffiType += "NSURLRequestVal";
 
 			case "NSIndexPath":
-				cffiType += "NSIndexPathVal()";
+				cffiType += "NSIndexPathVal";
 
 			case "NSIndexSet":
-				cffiType += "NSIndexSetVal()";
+				cffiType += "NSIndexSetVal";
 
 			case "NSRange":
-				cffiType += "NSRangeVal()";
+				cffiType += "NSRangeVal";
 
 			case "UIOffset":
-				cffiType += "UIOffsetVal()";
+				cffiType += "UIOffsetVal";
 				
 			case "UIImage":
-				cffiType += "UIImageVal()";
+				cffiType += "UIImageVal";
 				
 			case "UIColor":
-				cffiType += "UIColorVal()";
+				cffiType += "UIColorVal";
 				
 			case "UIFont":
-				cffiType += "UIFontVal()";
+				cffiType += "UIFontVal";
 				
 			default:
-				cffiType += "ObjectVal()";
+				cffiType += "ObjectVal";
 		}
 		
 		return cffiType;

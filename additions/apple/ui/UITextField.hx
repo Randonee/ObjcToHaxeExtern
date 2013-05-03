@@ -1,4 +1,4 @@
 	//Events
-	public static inline function UITextFieldTextDidBeginEditing():String{ return "UITextFieldTextDidBeginEditing";}
-	public static inline function UITextFieldTextDidChange():String{ return "UITextFieldTextDidChange";}
-	public static inline function UITextFieldTextDidEndEditing():String{ return "UITextFieldTextDidEndEditing";}
+	public static inline var UITextFieldTextDidBeginEditing:String = "UITextFieldTextDidBeginEditing";
+	public static inline var UITextFieldTextDidChange:String = "UITextFieldTextDidChange";
+	public static inline var UITextFieldTextDidEndEditing:String = "UITextFieldTextDidEndEditing";

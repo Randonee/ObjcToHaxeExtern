@@ -1,1 +1,1 @@
-	static public inline function UIBarButtonItemActionEvent():String{return "UIBarButtonItemActionEvent";}
+	static public inline var UIBarButtonItemActionEvent:String = "UIBarButtonItemActionEvent";
