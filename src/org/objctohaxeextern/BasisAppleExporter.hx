@@ -12,7 +12,7 @@ class BasisAppleExporter
 	private static inline function TYPES_TO_IGNORE():Array<String>{
 																return ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
 																"UIGestureRecognizer", "UIEvent", "NSAttributedString", "UIStoryboard", "UIStoryboardSegue",
-																"SEL", "NSSet", "UIViewController", "UIScreen", "NSBundle", "UILocalNotification", "UIBackgroundTaskIdentifier",
+																"SEL", "NSSet", "UIScreen", "NSBundle", "UILocalNotification", "UIBackgroundTaskIdentifier",
 																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
