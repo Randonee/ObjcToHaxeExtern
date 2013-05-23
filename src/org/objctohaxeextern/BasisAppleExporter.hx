@@ -149,12 +149,12 @@ class BasisAppleExporter
 			if(subClass.parentClassName != "" && subClass.name.toLowerCase().indexOf("delegate") == -1 && !parser.classes.items.exists(subClass.name))
 			{
 				trace(subClass.name);
-				createActuallClass(subClass);
+				createActuallClass(subClass, clazz.savePath);
 			}
 		}
 	}
 	
-	private function createActuallClass(clazz:Clazz):Void
+	private function createActuallClass(clazz:Clazz, ?additionsPath:String=""):Void
 	{
 		_protocolMethods = [];
 		_protocolProperties = [];
@@ -169,7 +169,11 @@ class BasisAppleExporter
 			_currentHxClassContent += "\n{\n";
 			
 			_currentClassAdditionContent = "";
-			var additionsFilePath:String = "additions/" + clazz.savePath + "/" + clazz.name + ".hx";
+			
+			if(additionsPath == "")
+				additionsPath = clazz.savePath;
+			
+			var additionsFilePath:String = "additions/" + additionsPath + "/" + clazz.name + ".hx";
 			if(FileSystem.exists(additionsFilePath))
 			{
 				_currentHxClassContent += "\n\t//Additions\n";
