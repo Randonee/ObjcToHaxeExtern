@@ -10,7 +10,8 @@ import sys.io.FileOutput;
 class BasisAppleExporter
 {
 	private static inline function TYPES_TO_IGNORE():Array<String>{
-																return ["CALayer", "NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
+																return ["id<CAAction>","CAAction", "CATransform3D", "CAAnimation",
+																"NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
 																"UIGestureRecognizer", "UIEvent", "NSAttributedString", "UIStoryboard", "UIStoryboardSegue",
 																"SEL", "NSSet", "UIScreen", "NSBundle", "UILocalNotification", "UIBackgroundTaskIdentifier",
 																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
@@ -18,7 +19,7 @@ class BasisAppleExporter
 																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
 																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem"];}
 																
-	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["UIImage"];}
+	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["UIImage", "id<CAAction>", "CAAction", "CATransform3D", "CAAnimation"];}
 																
 
 	public var parser(default, null):Parser;
@@ -140,6 +141,25 @@ class BasisAppleExporter
 		_currentHxClassContent += "import apple.ui.*;\n";
 		_currentHxClassContent += "import basis.BasisApplication;\n";
 		_currentHxClassContent += "import basis.object.TypeValues;\n";
+		
+		var imports:Map<String, String> = new Map();
+		for(property in clazz.properties)
+		{
+			var className:String = StringTools.replace(property.type, "*", "");
+			var propertyClass:Clazz = parser.classes.getClassForType(className, false);
+			
+			if(propertyClass != null) 
+			{
+				var importPath:String = createClassPackage(propertyClass);
+				if(importPath != packagePath && importPath != "")
+					imports.set(importPath + "." + className, importPath + "." + className);
+			}
+		}
+		
+		for(importPath in imports)
+			_currentHxClassContent += "import " + importPath + ";\n";
+		
+		
 		_currentHxClassContent += "\n";
 		
 		createActuallClass(clazz);
@@ -296,6 +316,9 @@ class BasisAppleExporter
 		if(fieldExistsInString(_currentClassAdditionContent, property.name))
 			return;
 			
+		if(property.name == "int")
+			return;
+			
 		var propNameUpper:String = property.name.charAt(0).toUpperCase() + property.name.substring(1);
 		var cppGetName:String = clazz.name.toLowerCase() + "_get" + propNameUpper;
 		var cppSetName:String = clazz.name.toLowerCase() + "_set" + propNameUpper;
@@ -349,9 +372,9 @@ class BasisAppleExporter
 	public function shouldIgnorType(type:String):Bool
 	{
 		type = StringTools.replace(type, "*", "");
-		for(a in 0...TYPES_TO_IGNORE().length)
+		for(ignoreType in TYPES_TO_IGNORE())
 		{
-			if(type == TYPES_TO_IGNORE()[a])
+			if(type == ignoreType)
 				return true;
 		}
 		
@@ -361,9 +384,9 @@ class BasisAppleExporter
 	public function shouldIgnorReturnType(type:String):Bool
 	{
 		type = StringTools.replace(type, "*", "");
-		for(a in 0...RETURN_TYPES_TO_IGNORE().length)
+		for(ignoreType in RETURN_TYPES_TO_IGNORE())
 		{
-			if(type == RETURN_TYPES_TO_IGNORE()[a])
+			if(type == ignoreType)
 				return true;
 		}
 		

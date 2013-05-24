@@ -268,6 +268,7 @@ class Parser
 	public function parseProperty(tokens:Array<String>, clazz:Clazz):Void
 	{
 		//token structure:[ "@", "property", "(", "option", ")", "type", "name"]
+		//token structure:[ "@", "property", "type", "name"]
 		
 		if(tokens[tokens.length - 1] == ";")
 			tokens.pop();
@@ -292,9 +293,10 @@ class Parser
 					property.setterName = tokens[index+2];
 			 	++index;
 			}
+			++index;
 		}
 		
-		++index;
+		
 		property.type = tokens[index];
 		++index;
 		while(tokens[index] == "*")
@@ -355,7 +357,13 @@ class Parser
 					++index;
 					
 					if(tokens[index] == "<" && tokens[index + 1] == "<")
-						element.value = tokens[index - 1] + " << " + tokens[index + 2];
+					{
+						var arg:String = tokens[index - 1];
+						if( Std.parseInt(arg.charAt(0)) != 0 && Std.parseInt(arg.charAt(0)) != null && arg.charAt(arg.length-1) == "U")
+							arg = arg.substring(0, arg.length-1);
+						
+						element.value = arg + " << " + tokens[index + 2];
+					}
 				}
 				++index;
 				

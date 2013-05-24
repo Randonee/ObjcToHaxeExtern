@@ -94,5 +94,10 @@
 				<include name="UIWindow.h" />
 			</fileset>
 		</copy>
+		<copy todir="in/apple/quartzcore">
+			<fileset dir="/System/Library/Frameworks/QuartzCore.framework/Headers">
+				<include name="CALayer.h" />
+			</fileset>
+		</copy>
 	</target>
 </project>
