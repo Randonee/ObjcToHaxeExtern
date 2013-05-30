@@ -60,6 +60,7 @@
 				<include name="UIDatePicker.h" />
 				<include name="UIImagePickerController.h" />
 				<include name="UIImageView.h" />
+				<include name="UIImage.h" />
 				<include name="UILabel.h" />
 				<include name="UINavigationController.h" />
 				<include name="UINavigationBar.h" />
@@ -97,6 +98,12 @@
 		<copy todir="in/apple/quartzcore">
 			<fileset dir="/System/Library/Frameworks/QuartzCore.framework/Headers">
 				<include name="CALayer.h" />
+			</fileset>
+		</copy>
+		<copy todir="in/apple/foundation">
+			<fileset dir="/System/Library/Frameworks/Foundation.framework/Headers">
+				<include name="NSData.h" />
+				<include name="NSError.h" />
 			</fileset>
 		</copy>
 	</target>

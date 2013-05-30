@@ -10,16 +10,16 @@ import sys.io.FileOutput;
 class BasisAppleExporter
 {
 	private static inline function TYPES_TO_IGNORE():Array<String>{
-																return ["id<CAAction>","CAAction", "CATransform3D", "CAAnimation",
-																"NSCoder", "Void", "NSArray", "NSLayoutConstraint", 
+																return ["id<CAAction>","CAAction", "CATransform3D", "CAAnimation", "CIImage", "CGImageRef",
+																"NSCoder", "Void", "NSArray", "NSLayoutConstraint", "CGBlendMode",
 																"UIGestureRecognizer", "UIEvent", "NSAttributedString", "UIStoryboard", "UIStoryboardSegue",
 																"SEL", "NSSet", "UIScreen", "NSBundle", "UILocalNotification", "UIBackgroundTaskIdentifier",
 																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
-																"UIPinchGestureRecognizer", "NSData", "UITextField", "Class", "UINib",
+																"UIPinchGestureRecognizer", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
 																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem"];}
 																
-	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["UIImage", "id<CAAction>", "CAAction", "CATransform3D", "CAAnimation"];}
+	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["CIImage", "id<CAAction>", "CAAction", "CATransform3D", "CAAnimation"];}
 																
 
 	public var parser(default, null):Parser;
@@ -144,15 +144,16 @@ class BasisAppleExporter
 		
 		var imports:Map<String, String> = new Map();
 		for(property in clazz.properties)
+			addImportClass(imports, property.type, packagePath);
+		
+		for(methods in clazz.methods)
 		{
-			var className:String = StringTools.replace(property.type, "*", "");
-			var propertyClass:Clazz = parser.classes.getClassForType(className, false);
-			
-			if(propertyClass != null) 
+			for(method in methods)
 			{
-				var importPath:String = createClassPackage(propertyClass);
-				if(importPath != packagePath && importPath != "")
-					imports.set(importPath + "." + className, importPath + "." + className);
+				addImportClass(imports, method.returnType, packagePath);
+			
+				for(arg in method.arguments)
+					addImportClass(imports, arg.type, packagePath);
 			}
 		}
 		
@@ -171,6 +172,19 @@ class BasisAppleExporter
 				trace(subClass.name);
 				createActuallClass(subClass, clazz.savePath);
 			}
+		}
+	}
+	
+	private function addImportClass(imports:Map<String, String>, type:String, packagePath:String):Void
+	{
+		var className:String = StringTools.replace(type, "*", "");
+		var typeClass:Clazz = parser.classes.getClassForType(className, false);
+		
+		if(typeClass != null) 
+		{
+			var importPath:String = createClassPackage(typeClass);
+			if(importPath != packagePath && importPath != "")
+				imports.set(importPath + "." + className, importPath + "." + className);
 		}
 	}
 	
@@ -579,7 +593,7 @@ class BasisAppleExporter
 		type = StringTools.replace(type, "*", "");
 		var newType:String = type;
 		
-		if(type != "NSURLRequest" && type != "NSURL" && type != "NSIndexPath"  && type != "NSIndexSet"   && type != "UIImage" && type != "UIColor") 
+		if(type != "NSURLRequest" && type != "NSURL" && type != "NSIndexPath"  && type != "NSIndexSet"  && type != "UIColor") 
 			newType = getHaxeType(type);
 		
 		if(newType != "Array<Float>" && newType != "Array<int>")
@@ -644,9 +658,6 @@ class BasisAppleExporter
 			case "UIOffset":
 				cffiType += "UIOffsetVal";
 				
-			case "UIImage":
-				cffiType += "UIImageVal";
-				
 			case "UIColor":
 				cffiType += "UIColorVal";
 				
@@ -709,7 +720,6 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("IMP", "Dynamic");
 		_typeObjToHaxe.set("Protocol*", "Dynamic");
 		_typeObjToHaxe.set("unsigned", "Dynamic");
-		_typeObjToHaxe.set("NSError**", "Dynamic");
 		_typeObjToHaxe.set("NSComparisonResult", "Dynamic");
 		_typeObjToHaxe.set("__unsafe_unretained*", "Dynamic");
 		_typeObjToHaxe.set(",", "Dynamic");
@@ -735,8 +745,6 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSIndexSet", "Array<Int>");
 		_typeObjToHaxe.set("UIOffset", "Array<Int>");
 		_typeObjToHaxe.set("NSRange", "Array<Int>");
-		_typeObjToHaxe.set("UIImage", "String");
-		_typeObjToHaxe.set("UIImage*", "String");
 		
 		
 		_typeObjToHaxe.set("NSZone", "Dynamic");
