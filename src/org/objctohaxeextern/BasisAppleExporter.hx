@@ -17,9 +17,17 @@ class BasisAppleExporter
 																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
-																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem"];}
+																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem",
 																
-	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["CIImage", "id<CAAction>", "CAAction", "CATransform3D", "CAAnimation"];}
+																"NSModalSession", "NSApplicationDelegate", "NSMenuDelegate", "NSWindowDelegate", "NSBezierPath",
+																"CIContext", "NSRangePointer", "IBAction", "NSValidatedUserInterfaceItem", "CIColor", "outid", "NSScrollerArrow",
+																"NSCopying", "NSSizeArray", "id <NSCopying>", "NSRectArray", "NSCharacterSet", "NSPageLayout", "NSMutableDictionary"
+																];}
+																
+	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["CIImage", "id<CAAction>", "CAAction", "CATransform3D", "CAAnimation",
+																				"NS_RETURNS_INNER_POINTER", "NSMenuDelegate", "NSApplicationDelegate", "NSWindowDelegate", "NSRangePointer",
+																				"IBAction", "NSValidatedUserInterfaceItem", "CIColor", "NSCopying", "NSRectArray"
+																				];}
 																
 
 	public var parser(default, null):Parser;
@@ -70,6 +78,49 @@ class BasisAppleExporter
 		_enumNames.push("UITextSpellCheckingType");
 		_enumNames.push("UIKeyboardType");
 		_enumNames.push("UIInterfaceOrientation");
+		
+		_enumNames.push("NSWindowDepth");
+		_enumNames.push("NSEventType");
+		_enumNames.push("NSApplicationDelegateReply");
+		_enumNames.push("NSRequestUserAttentionType");
+		_enumNames.push("NSFocusRingType");
+		_enumNames.push("NSControlSize");
+		_enumNames.push("NSWindowButton");
+		_enumNames.push("NSSelectionDirection");
+		_enumNames.push("NSPointingDeviceType");
+		_enumNames.push("NSSelectionDirection");
+		_enumNames.push("NSCompositingOperation");
+		_enumNames.push("NSCellType");
+		_enumNames.push("NSImageInterpolation");
+		_enumNames.push("NSWindowDepth");
+		_enumNames.push("NSImageCacheMode");
+		_enumNames.push("NSControlTint");
+		_enumNames.push("NSBackingStoreType");
+		_enumNames.push("NSBorderType");
+		_enumNames.push("NSTIFFCompression");
+		_enumNames.push("NSWindowOrderingMode");
+		_enumNames.push("NSBitmapFormat");
+		_enumNames.push("NSToolbarSizeMode");
+		_enumNames.push("NSToolbarDisplayMode");
+		_enumNames.push("NSFontRenderingMode");
+		_enumNames.push("NSRulerOrientation");
+		_enumNames.push("NSBezelStyle");
+		_enumNames.push("NSCellAttribute");
+		_enumNames.push("NSUsableScrollerParts");
+		_enumNames.push("NSCellImagePosition");
+		_enumNames.push("NSUsableScrollerParts");
+		_enumNames.push("NSSaveOperationType");
+		_enumNames.push("NSGradientType");
+		_enumNames.push("NSButtonType");
+		_enumNames.push("NSPrinterTableStatus");
+		_enumNames.push("NSScrollerPart");
+		_enumNames.push("NSPrintingPaginationMode");
+		_enumNames.push("NSDocumentChangeType");
+		_enumNames.push("NSPrintingOrientation");
+		_enumNames.push("NSScrollArrowPosition");
+		
+		
+		
 		
 		var hxSavePath:String = "";
 		for(clazz in parser.classes.items)
@@ -156,6 +207,19 @@ class BasisAppleExporter
 					addImportClass(imports, arg.type, packagePath);
 			}
 		}
+		
+		for(methods in clazz.staticMethods)
+		{
+			for(method in methods)
+			{
+				addImportClass(imports, method.returnType, packagePath);
+			
+				for(arg in method.arguments)
+					addImportClass(imports, arg.type, packagePath);
+			}
+		}
+		
+		
 		
 		for(importPath in imports)
 			_currentHxClassContent += "import " + importPath + ";\n";
@@ -681,6 +745,10 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSUInteger", "Int");
 		_typeObjToHaxe.set("NSUInteger*", "Int");
 		_typeObjToHaxe.set("unsignedint", "Int");
+		_typeObjToHaxe.set("unsignedshort", "Int");
+		
+		
+		_typeObjToHaxe.set("short", "Int");
 		_typeObjToHaxe.set("size_t", "Int");
 		_typeObjToHaxe.set("int64_t", "Int");
 		_typeObjToHaxe.set("int32_t", "Int");
@@ -690,11 +758,24 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSStringEncoding", "Int");
 		_typeObjToHaxe.set("NSStringEncoding*", "Int");
 		_typeObjToHaxe.set("NSStringCompareOptions", "Int");
+		_typeObjToHaxe.set("NSWindowDepth", "Int");
+		_typeObjToHaxe.set("NSWindowDepth*", "Int");
+		_typeObjToHaxe.set("NSColorSpaceModel", "Int");
+		_typeObjToHaxe.set("NSToolTipTag", "Int");
+		_typeObjToHaxe.set("NSTrackingRectTag", "Int");
+		_typeObjToHaxe.set("NSTIFFCompression*", "Int");
+		_typeObjToHaxe.set("NSTIFFCompression**", "Int");
+		_typeObjToHaxe.set("NSFontSymbolicTraits", "Int");
+		_typeObjToHaxe.set("NSGradientDrawingOptions", "Int");
+		
 		_typeObjToHaxe.set("float", "Float");
 		_typeObjToHaxe.set("NSTimeInterval", "Float");
 		_typeObjToHaxe.set("CGFloat", "Float");
 		_typeObjToHaxe.set("CGFloat*", "Float");
 		_typeObjToHaxe.set("double", "Float");
+		_typeObjToHaxe.set("unsignedlonglong", "Float");
+		_typeObjToHaxe.set("float*", "Float");
+		_typeObjToHaxe.set("float", "Float");
 		_typeObjToHaxe.set("CFTimeInterval", "Float");
 		_typeObjToHaxe.set("CFTimeInterval*", "Float");
 		_typeObjToHaxe.set("unsignedlong", "Float");
@@ -703,6 +784,7 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("bool", "Bool");
 		_typeObjToHaxe.set("BOOL", "Bool");
 		_typeObjToHaxe.set("NSString*", "String");
+		_typeObjToHaxe.set("NSString**", "String");
 		_typeObjToHaxe.set("NSString", "String");
 		_typeObjToHaxe.set("unichar", "String");
 		_typeObjToHaxe.set("unichar*", "String");
@@ -731,6 +813,7 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("CGSize", "Array<Float>");
 		_typeObjToHaxe.set("CGPoint", "Array<Float>");
 		_typeObjToHaxe.set("CGAffineTransform", "Array<Float>");
+		_typeObjToHaxe.set("NSAffineTransformStruct", "Array<Float>");
 		_typeObjToHaxe.set("UIColor", "Array<Float>");
 		_typeObjToHaxe.set("UIColor*", "Array<Float>");
 		_typeObjToHaxe.set("UIEdgeInsets", "Array<Float>");
@@ -746,6 +829,19 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("UIOffset", "Array<Int>");
 		_typeObjToHaxe.set("NSRange", "Array<Int>");
 		
+		_typeObjToHaxe.set("NSGlyph", "Int");
+		
+		
+		
+		_typeObjToHaxe.set("NSPoint", "Array<Float>");
+		_typeObjToHaxe.set("NSRect", "Array<Float>");
+		_typeObjToHaxe.set("NSRect**", "Array<Float>");
+		
+		_typeObjToHaxe.set("NSSize", "Array<Float>");
+		
+		_typeObjToHaxe.set("unsignedchar**", "String");
+		_typeObjToHaxe.set("unsignedchar*", "String");
+		_typeObjToHaxe.set("unsignedchar", "String");
 		
 		_typeObjToHaxe.set("NSZone", "Dynamic");
 		_typeObjToHaxe.set("NSZone*", "Dynamic");

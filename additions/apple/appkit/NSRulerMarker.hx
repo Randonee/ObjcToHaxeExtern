@@ -1,0 +1,1 @@
+	// public function representedObject():NSCopying

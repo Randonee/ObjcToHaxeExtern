@@ -107,4 +107,72 @@
 			</fileset>
 		</copy>
 	</target>
+	
+	<target name="copyosxheaders">
+			<delete dir="in"/>
+			
+			<copy todir="in/apple/appkit">
+				<fileset dir="/System/Library/Frameworks/AppKit.framework/Headers">
+					<include name="NSApplication.h" />
+					<include name="NSWindow.h" />
+					<include name="NSMenu.h" />
+					<include name="NSResponder.h" />
+					<include name="NSEvent.h" />
+					<include name="NSGraphicsContext.h" />
+					<include name="NSButton.h" />
+					<include name="NSView.h" />
+					<include name="NSBitmapImageRep.h" />
+					<include name="NSWindowButton.h" />
+					<include name="NSControl.h" />
+					<include name="NSFont.h" />
+					<include name="NSPasteboard.h" />
+					<include name="NSFontDescriptor.h" />
+					<include name="NSCursor.h" />
+					<include name="NSImageRep.h" />
+					<include name="NSCell.h" />
+					<include name="NSImage.h" />
+					<include name="NSScreen.h" />
+					<include name="NSColor.h" />
+					<include name="NSScrollView.h" />
+					<include name="NSColorSpace.h" />
+					<include name="NSWindowController.h" />
+					<include name="NSClipView.h" />
+					<include name="NSButtonCell.h" />
+					<include name="NSRulerView.h" />
+					<include name="NSDocument.h" />
+					<include name="NSScroller.h" />
+					<include name="NSRulerMarker.h" />
+					<include name="NSToolbar.h" />
+					<include name="NSActionCell.h" />
+					<include name="NSPrintInfo.h" />
+					<include name="NSSavePanel.h" />
+					<include name="NSPrinter.h" />
+					<include name="NSGradient.h" />
+					<include name="NSPanel.h" />
+					<include name="NSSound.h" />
+					<include name="NSMenuItem.h" />
+					
+					
+				</fileset>
+			</copy>
+		
+			<copy todir="in/apple/quartzcore">
+				<fileset dir="/System/Library/Frameworks/QuartzCore.framework/Headers">
+					<include name="CALayer.h" />
+				</fileset>
+			</copy>
+			
+		
+			<copy todir="in/apple/foundation">
+				<fileset dir="/System/Library/Frameworks/Foundation.framework/Headers">
+					<include name="NSData.h" />
+					<include name="NSError.h" />
+					<include name="NSException.h" />
+					<include name="NSFileWrapper.h" />
+					<include name="NSAffineTransform.h" />
+					<include name="NSFormatter.h" />
+					<include name="NSNotification.h" />
+				</fileset>
+			</copy>
+		</target>
 </project>

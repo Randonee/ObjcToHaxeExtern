@@ -1,0 +1,1 @@
+	public var delegate(default, null):Dynamic;
