@@ -767,6 +767,7 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSTIFFCompression**", "Int");
 		_typeObjToHaxe.set("NSFontSymbolicTraits", "Int");
 		_typeObjToHaxe.set("NSGradientDrawingOptions", "Int");
+		_typeObjToHaxe.set("UIBarButtonItemStyle", "Int");
 		
 		_typeObjToHaxe.set("float", "Float");
 		_typeObjToHaxe.set("NSTimeInterval", "Float");
