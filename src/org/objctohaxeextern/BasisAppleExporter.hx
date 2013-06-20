@@ -12,19 +12,20 @@ class BasisAppleExporter
 	private static inline function TYPES_TO_IGNORE():Array<String>{
 																return ["id<CAAction>","CAAction", "CATransform3D", "CAAnimation", "CIImage", "CGImageRef",
 																"NSCoder", "Void", "NSArray", "NSLayoutConstraint", "CGBlendMode",
-																"UIGestureRecognizer", "UIEvent", "NSAttributedString", "UIStoryboard", "UIStoryboardSegue",
+																"UIGestureRecognizer", "UIEvent", "UIStoryboard", "UIStoryboardSegue",
 																"SEL", "NSSet", "UIScreen", "NSBundle", "UILocalNotification", "UIBackgroundTaskIdentifier",
 																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
 																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem",
 																
-																"NSModalSession", "NSApplicationDelegate", "NSMenuDelegate", "NSWindowDelegate", "NSBezierPath",
-																"CIContext", "NSRangePointer", "IBAction", "NSValidatedUserInterfaceItem", "CIColor", "outid", "NSScrollerArrow",
-																"NSCopying", "NSSizeArray", "id <NSCopying>", "NSRectArray", "NSCharacterSet", "NSPageLayout", "NSMutableDictionary"
+																"NSModalSession", "NSApplicationDelegate", "NSMenuDelegate", "NSWindowDelegate", "NSBezierPath", "NSPointPointer", "NSLineSweepDirection",
+																"CIContext", "NSRangePointer", "IBAction", "NSValidatedUserInterfaceItem", "CIColor", "outid", "NSScrollerArrow", "NSDraggingInfo",
+																"NSCopying", "NSSizeArray", "id <NSCopying>", "NSRectArray", "NSCharacterSet", "NSPageLayout", "NSMutableDictionary",
+																"NSTypesetterBehavior", "NSGlyphGenerator", "NSTypesetter"
 																];}
 																
-	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["CIImage", "id<CAAction>", "CAAction", "CATransform3D", "CAAnimation",
+	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["CIImage", "id<CAAction>", "CAAction", "CATransform3D", "CAAnimation", "NSPointPointer", "NSLineSweepDirection",
 																				"NS_RETURNS_INNER_POINTER", "NSMenuDelegate", "NSApplicationDelegate", "NSWindowDelegate", "NSRangePointer",
 																				"IBAction", "NSValidatedUserInterfaceItem", "CIColor", "NSCopying", "NSRectArray"
 																				];}
@@ -118,7 +119,20 @@ class BasisAppleExporter
 		_enumNames.push("NSDocumentChangeType");
 		_enumNames.push("NSPrintingOrientation");
 		_enumNames.push("NSScrollArrowPosition");
-		
+		_enumNames.push("NSSelectionGranularity");
+		_enumNames.push("NSImageScaling");
+		_enumNames.push("NSSelectionAffinity");
+		_enumNames.push("NSTextContainer");
+		_enumNames.push("NSImageAlignment");
+		_enumNames.push("NSDragOperation");
+		_enumNames.push("NSImageFrameStyle");
+		_enumNames.push("NSTextBlockValueType");
+		_enumNames.push("NSTextTableLayoutAlgorithm");
+		_enumNames.push("NSRectEdge");
+		_enumNames.push("NSTextBlockLayer");
+		_enumNames.push("NSGlyphInscription");
+		_enumNames.push("NSTextBlockVerticalAlignment");
+		_enumNames.push("NSTextBlockDimension");
 		
 		
 		
@@ -219,7 +233,7 @@ class BasisAppleExporter
 			}
 		}
 		
-		
+		addImportClass(imports, clazz.parentClassName, packagePath);
 		
 		for(importPath in imports)
 			_currentHxClassContent += "import " + importPath + ";\n";
@@ -247,7 +261,15 @@ class BasisAppleExporter
 		if(typeClass != null) 
 		{
 			var importPath:String = createClassPackage(typeClass);
-			if(importPath != packagePath && importPath != "")
+			if(importPath == "")
+			{
+				importPath = createClassPackage(typeClass.parentClassOfFile);
+				className = typeClass.parentClassOfFile.name;
+				if(importPath != "")
+					imports.set(importPath + "." + className, importPath + "." + className);
+				
+			}
+			else if(importPath != packagePath && importPath != "")
 				imports.set(importPath + "." + className, importPath + "." + className);
 		}
 	}
@@ -559,12 +581,9 @@ class BasisAppleExporter
 	
 	public function createEnum(enumeration:Enumeration):Void
 	{
-		if(enumeration.name == "{" || enumeration.name == "")
-			return;
-	
-		
 		for(a in 0...enumeration.elements.length)
 		{
+		
 			if( enumeration.elements[a].name.length <= 4)
 				return ;
 				
@@ -768,6 +787,9 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSFontSymbolicTraits", "Int");
 		_typeObjToHaxe.set("NSGradientDrawingOptions", "Int");
 		_typeObjToHaxe.set("UIBarButtonItemStyle", "Int");
+		_typeObjToHaxe.set("NSGlyphInscription", "Int");
+		_typeObjToHaxe.set("NSGlyphInscription*", "Int");
+		_typeObjToHaxe.set("NSGlyphInscription**", "Int");
 		
 		_typeObjToHaxe.set("float", "Float");
 		_typeObjToHaxe.set("NSTimeInterval", "Float");
@@ -784,9 +806,14 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("UIWindowLevel", "Float");
 		_typeObjToHaxe.set("bool", "Bool");
 		_typeObjToHaxe.set("BOOL", "Bool");
+		_typeObjToHaxe.set("BOOL*", "Bool");
 		_typeObjToHaxe.set("NSString*", "String");
 		_typeObjToHaxe.set("NSString**", "String");
 		_typeObjToHaxe.set("NSString", "String");
+		_typeObjToHaxe.set("NSMutableString", "String");
+		_typeObjToHaxe.set("NSMutableString*", "String");
+		_typeObjToHaxe.set("NSMutableString**", "String");
+		
 		_typeObjToHaxe.set("unichar", "String");
 		_typeObjToHaxe.set("unichar*", "String");
 		_typeObjToHaxe.set("__strongchar*", "String");
@@ -831,6 +858,8 @@ class BasisAppleExporter
 		_typeObjToHaxe.set("NSRange", "Array<Int>");
 		
 		_typeObjToHaxe.set("NSGlyph", "Int");
+		_typeObjToHaxe.set("NSGlyph*", "Int");
+		_typeObjToHaxe.set("NSGlyph**", "Int");
 		
 		
 		

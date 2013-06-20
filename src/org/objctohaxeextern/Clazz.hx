@@ -72,6 +72,7 @@ class Clazz
 	public var structures(default, null):Array<Structure>;
 	public var savePath(default, default):String;
 	public var classesInSameFile(default, default):Array<Clazz>;
+	public var parentClassOfFile(default, default):Clazz;
 	public var isProtocol(default, default):Bool;
 	public var hasDefinition(default, default):Bool;
 	public var tokens(default, default):Array<String>;

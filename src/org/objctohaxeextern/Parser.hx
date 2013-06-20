@@ -86,6 +86,7 @@ class Parser
 								{
 									currentClazz = new Clazz();
 									currentClazz.hasDefinition = true;
+									currentClazz.parentClassOfFile = mainClazz;
 									mainClazz.classesInSameFile.push(currentClazz);
 								}
 								parseLine(tokens, currentClazz);

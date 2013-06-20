@@ -151,7 +151,14 @@
 					<include name="NSPanel.h" />
 					<include name="NSSound.h" />
 					<include name="NSMenuItem.h" />
-					
+					<include name="NSTextView.h" />
+					<include name="NSLayoutManager.h" />
+					<include name="NSImageView.h" />
+					<include name="NSTextContainer.h" />
+					<include name="NSTextTable.h" />
+					<include name="NSTextStorage.h" />
+					<include name="NSText.h" />
+					<include name="NSParagraphStyle.h" />
 					
 				</fileset>
 			</copy>
@@ -172,6 +179,7 @@
 					<include name="NSAffineTransform.h" />
 					<include name="NSFormatter.h" />
 					<include name="NSNotification.h" />
+					<include name="NSAttributedString.h" />
 				</fileset>
 			</copy>
 		</target>
