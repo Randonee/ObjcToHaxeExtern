@@ -682,7 +682,7 @@ class BasisAppleExporter
 		type = StringTools.replace(type, "*", "");
 		var newType:String = type;
 		
-		if(type != "NSURLRequest" && type != "NSURL" && type != "NSIndexPath"  && type != "NSIndexSet"  && type != "UIColor") 
+		if(type != "NSURLRequest" && type != "NSURL" && type != "NSIndexPath"  && type != "NSIndexSet"  && type != "UIColor"  && type != "NSRange") 
 			newType = getHaxeType(type);
 		
 		if(newType != "Array<Float>" && newType != "Array<int>")
