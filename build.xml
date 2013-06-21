@@ -96,21 +96,15 @@
 			</fileset>
 		</copy>
 		<copy todir="in/apple/quartzcore">
-			<fileset dir="/System/Library/Frameworks/QuartzCore.framework/Headers">
-				<include name="CALayer.h" />
+			<fileset dir="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/QuartzCore.framework/Headers">
+				<include name="CADisplayLink.h" />
 			</fileset>
 		</copy>
-		<copy todir="in/apple/foundation">
-			<fileset dir="/System/Library/Frameworks/Foundation.framework/Headers">
-				<include name="NSData.h" />
-				<include name="NSError.h" />
-			</fileset>
-		</copy>
+		<antcall target="copysharedheaders" />
 	</target>
 	
 	<target name="copyosxheaders">
 			<delete dir="in"/>
-			
 			<copy todir="in/apple/appkit">
 				<fileset dir="/System/Library/Frameworks/AppKit.framework/Headers">
 					<include name="NSApplication.h" />
@@ -159,18 +153,14 @@
 					<include name="NSTextStorage.h" />
 					<include name="NSText.h" />
 					<include name="NSParagraphStyle.h" />
-					
 				</fileset>
 			</copy>
 		
-			<copy todir="in/apple/quartzcore">
-				<fileset dir="/System/Library/Frameworks/QuartzCore.framework/Headers">
-					<include name="CALayer.h" />
-				</fileset>
-			</copy>
-			
-		
-			<copy todir="in/apple/foundation">
+		<antcall target="copysharedheaders" />
+		</target>
+	
+	<target name="copysharedheaders">
+		<copy todir="in/apple/foundation">
 				<fileset dir="/System/Library/Frameworks/Foundation.framework/Headers">
 					<include name="NSData.h" />
 					<include name="NSError.h" />
@@ -180,7 +170,17 @@
 					<include name="NSFormatter.h" />
 					<include name="NSNotification.h" />
 					<include name="NSAttributedString.h" />
+					<include name="NSRunLoop.h" />
 				</fileset>
 			</copy>
-		</target>
+		
+		<copy todir="in/apple/quartzcore">
+			<fileset dir="/System/Library/Frameworks/QuartzCore.framework/Headers">
+				<include name="CALayer.h" />
+			</fileset>
+		</copy>
+	</target>
+		
+		
+	
 </project>

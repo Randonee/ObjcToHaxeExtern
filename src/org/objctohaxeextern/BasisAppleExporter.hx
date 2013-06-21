@@ -17,7 +17,7 @@ class BasisAppleExporter
 																"NSUndoManager", "NSDictionary", "UIPanGestureRecognizer",
 																"UIPinchGestureRecognizer", "UITextField", "Class", "UINib",
 																"UICollectionViewLayout", "UICollectionViewLayoutAttributes",
-																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem",
+																"NSLocale", "NSCalendar", "NSTimeZone", "NSDate", "UITabBarItem", "CFRunLoopRef", "NSTimer", "NSPort",
 																
 																"NSModalSession", "NSApplicationDelegate", "NSMenuDelegate", "NSWindowDelegate", "NSBezierPath", "NSPointPointer", "NSLineSweepDirection",
 																"CIContext", "NSRangePointer", "IBAction", "NSValidatedUserInterfaceItem", "CIColor", "outid", "NSScrollerArrow", "NSDraggingInfo",
@@ -27,7 +27,7 @@ class BasisAppleExporter
 																
 	private static inline function RETURN_TYPES_TO_IGNORE():Array<String>{return ["CIImage", "id<CAAction>", "CAAction", "CATransform3D", "CAAnimation", "NSPointPointer", "NSLineSweepDirection",
 																				"NS_RETURNS_INNER_POINTER", "NSMenuDelegate", "NSApplicationDelegate", "NSWindowDelegate", "NSRangePointer",
-																				"IBAction", "NSValidatedUserInterfaceItem", "CIColor", "NSCopying", "NSRectArray"
+																				"IBAction", "NSValidatedUserInterfaceItem", "CIColor", "NSCopying", "NSRectArray", "CFRunLoopRef"
 																				];}
 																
 
@@ -206,6 +206,12 @@ class BasisAppleExporter
 		_currentHxClassContent += "import apple.ui.*;\n";
 		_currentHxClassContent += "import basis.BasisApplication;\n";
 		_currentHxClassContent += "import basis.object.TypeValues;\n";
+		
+		if(clazz.name == "UIImage")
+		{
+			_currentHxClassContent += "import basis.util.BaseCode64;";
+			_currentHxClassContent += "import haxe.io.Bytes;";
+		}
 		
 		var imports:Map<String, String> = new Map();
 		for(property in clazz.properties)
