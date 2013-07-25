@@ -100,6 +100,15 @@
 				<include name="CADisplayLink.h" />
 			</fileset>
 		</copy>
+		
+		<mkdir dir="in/apple/avfoundation"/>
+		<copy todir="in/apple/avfoundation">
+			<fileset dir="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/AVFoundation.framework/Headers">
+				<include name="AVAudioRecorder.h" />
+				<include name="AVAudioPlayer.h" />
+			</fileset>
+		</copy>
+		
 		<antcall target="copysharedheaders" />
 	</target>
 	
