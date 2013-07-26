@@ -106,6 +106,7 @@
 			<fileset dir="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/AVFoundation.framework/Headers">
 				<include name="AVAudioRecorder.h" />
 				<include name="AVAudioPlayer.h" />
+				<include name="AVAudioSession.h" />
 			</fileset>
 		</copy>
 		
