@@ -163,6 +163,7 @@
 					<include name="NSTextStorage.h" />
 					<include name="NSText.h" />
 					<include name="NSParagraphStyle.h" />
+					<include name="NSSpeechRecognizer.h" />
 				</fileset>
 			</copy>
 		
